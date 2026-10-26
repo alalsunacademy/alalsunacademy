@@ -1,1 +1,200 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>أكاديميا نكست — Academia Next</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Noto+Kufi+Arabic:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    height: 100%;
+    font-family: 'Noto Kufi Arabic', 'Plus Jakarta Sans', system-ui, sans-serif;
+  }
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #091426 0%, #1e293b 50%, #0058be 100%);
+    position: relative;
+    overflow: hidden;
+    padding: 20px;
+  }
 
+  /* دوائر ضوئية في الخلفية */
+  body::before,
+  body::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    pointer-events: none;
+  }
+  body::before {
+    width: 400px;
+    height: 400px;
+    background: rgba(0, 88, 190, 0.4);
+    top: -100px;
+    right: -100px;
+  }
+  body::after {
+    width: 350px;
+    height: 350px;
+    background: rgba(216, 226, 255, 0.15);
+    bottom: -100px;
+    left: -100px;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 32px;
+    text-align: center;
+  }
+
+  /* الشكل البيضاوي للشعار */
+  .logo-oval {
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.95);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    box-shadow:
+      0 0 0 8px rgba(255, 255, 255, 0.1),
+      0 0 0 16px rgba(255, 255, 255, 0.05),
+      0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: float 3s ease-in-out infinite;
+    overflow: hidden;
+  }
+
+  .logo-oval img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 50%;
+  }
+
+  /* لو مفيش صورة، نعرض حروف */
+  .logo-oval .fallback {
+    font-size: 64px;
+    font-weight: 800;
+    color: #0058be;
+    letter-spacing: -2px;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+  }
+
+  /* اسم الأكاديمية */
+  .brand {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    color: #fff;
+  }
+  .brand h1 {
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+  .brand p {
+    font-size: 14px;
+    color: rgba(216, 226, 255, 0.8);
+    font-weight: 400;
+  }
+
+  /* الزر */
+  .enter-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 48px;
+    background: #fff;
+    color: #091426;
+    text-decoration: none;
+    border-radius: 999px;
+    font-size: 16px;
+    font-weight: 700;
+    font-family: inherit;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: none;
+  }
+  .enter-btn:hover {
+    background: #0058be;
+    color: #fff;
+    transform: translateY(-3px);
+    box-shadow: 0 15px 40px rgba(0, 88, 190, 0.4);
+  }
+  .enter-btn svg {
+    width: 20px;
+    height: 20px;
+    transition: transform 0.3s ease;
+  }
+  .enter-btn:hover svg {
+    transform: translateX(-4px);
+  }
+
+  /* موبايل */
+  @media (max-width: 480px) {
+    .logo-oval {
+      width: 170px;
+      height: 170px;
+    }
+    .logo-oval .fallback {
+      font-size: 48px;
+    }
+    .brand h1 {
+      font-size: 24px;
+    }
+    .enter-btn {
+      padding: 14px 36px;
+      font-size: 14px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- الشعار البيضاوي -->
+  <div class="logo-oval">
+    <!-- 
+      ⬇️⬇️⬇️ ضع هنا مسار شعارك ⬇️⬇️⬇️
+      استبدل "logo.png" باسم صورة الشعار اللي عندك
+      أو ارفع الصورة على Supabase Storage وحط الرابط
+    -->
+    <img src="logo.png" alt="شعار أكاديميا نكست"
+         onerror="this.style.display='none'; this.parentNode.querySelector('.fallback').style.display='flex';">
+    <span class="fallback" style="display:none;">AN</span>
+  </div>
+
+  <!-- اسم الأكاديمية -->
+  <div class="brand">
+    <h1>أكاديميا نكست</h1>
+    <p>بوابة التعليم والقبول الأكاديمي</p>
+  </div>
+
+  <!-- زر الدخول -->
+  <a href="site.html" class="enter-btn">
+    الدخول للموقع
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+    </svg>
+  </a>
+
+</div>
+
+</body>
+  </html>
