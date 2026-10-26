@@ -15,15 +15,13 @@ tailwind.config = { darkMode:"class", theme:{ extend:{
     "secondary-fixed":"#d8e2ff","on-secondary-fixed":"#001a42","on-secondary-fixed-variant":"#004395",
     "tertiary":"#0a0054","tertiary-container":"#18008f","tertiary-fixed":"#e2dfff","on-tertiary-fixed-variant":"#3323cc",
     "surface":"#f7f9fb","surface-container":"#eceef0","surface-container-low":"#f2f4f6",
-    "surface-container-lowest":"#ffffff","surface-container-high":"#e6e8ea","surface-container-highest":"#e0e3e5",
+    "surface-container-lowest":"#ffffff","surface-container-high":"#e6e8ea",
     "on-surface":"#191c1e","on-surface-variant":"#45474c","outline":"#75777d","outline-variant":"#c5c6cd",
-    "primary-fixed":"#d8e3fb","primary-fixed-dim":"#bcc7de","on-primary-fixed":"#111c2d",
-    "on-primary-container":"#8590a6","on-primary-fixed-variant":"#3c475a",
-    "error":"#ba1a1a","error-container":"#ffdad6","on-error-container":"#93000a"
+    "primary-fixed":"#d8e3fb","on-primary-container":"#8590a6","error":"#ba1a1a"
   },
   borderRadius:{ DEFAULT:"0.25rem", lg:"0.5rem", xl:"0.75rem", "2xl":"1rem", "3xl":"1.5rem", full:"9999px" },
   spacing:{ "space-xs":"0.25rem","space-sm":"0.5rem","space-md":"1rem","space-lg":"1.5rem","space-xl":"2.5rem","gutter":"1.5rem" },
-  fontFamily:{ "body-md":["Plus Jakarta Sans","Noto Kufi Arabic"],"body-sm":["Plus Jakarta Sans"],"body-lg":["Plus Jakarta Sans"],"headline-sm":["Plus Jakarta Sans"],"headline-md":["Plus Jakarta Sans"],"headline-lg":["Plus Jakarta Sans"],"title-card":["Plus Jakarta Sans"],"display-hero":["Plus Jakarta Sans"],"label-badge":["Plus Jakarta Sans"],"stat-counter":["Plus Jakarta Sans"] },
+  fontFamily:{ "body-md":["Plus Jakarta Sans"],"body-sm":["Plus Jakarta Sans"],"body-lg":["Plus Jakarta Sans"],"headline-sm":["Plus Jakarta Sans"],"headline-md":["Plus Jakarta Sans"],"headline-lg":["Plus Jakarta Sans"],"title-card":["Plus Jakarta Sans"],"display-hero":["Plus Jakarta Sans"],"label-badge":["Plus Jakarta Sans"] },
   fontSize:{
     "body-sm":["13px",{lineHeight:"20px",fontWeight:"400"}],
     "body-md":["14px",{lineHeight:"22px",fontWeight:"400"}],
@@ -33,217 +31,260 @@ tailwind.config = { darkMode:"class", theme:{ extend:{
     "headline-sm":["20px",{lineHeight:"28px",fontWeight:"600"}],
     "headline-md":["24px",{lineHeight:"34px",fontWeight:"700"}],
     "headline-lg":["36px",{lineHeight:"48px",fontWeight:"700"}],
-    "display-hero":["48px",{lineHeight:"60px",fontWeight:"800"}],
-    "stat-counter":["40px",{lineHeight:"48px",fontWeight:"800"}]
+    "display-hero":["48px",{lineHeight:"60px",fontWeight:"800"}]
   }
 }}}
 </script>
 <style>
 @layer base{html,body{margin:0;padding:0;font-family:'Noto Kufi Arabic','Plus Jakarta Sans',sans-serif}body{overscroll-behavior:none}}
 ::-webkit-scrollbar{display:none}
-.scrollbar-none::-webkit-scrollbar{display:none}
+.line-clamp-1{display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+.line-clamp-2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+html{scroll-behavior:smooth;scroll-padding-top:80px}
+
+/* ===== Carousel (موحد للموقع كله) ===== */
+.carousel-track {
+  display: flex; gap: 1rem; overflow-x: auto; scroll-behavior: smooth;
+  padding: 0.5rem 0 1.5rem; cursor: grab; scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+.carousel-track.dragging { cursor: grabbing; scroll-behavior: auto; }
+.carousel-track::-webkit-scrollbar { height: 6px; }
+.carousel-track::-webkit-scrollbar-track { background: #eceef0; border-radius: 99px; }
+.carousel-track::-webkit-scrollbar-thumb { background: #0058be; border-radius: 99px; }
+.carousel-card {
+  flex: 0 0 320px; max-width: 320px; background: #fff; border-radius: 1rem;
+  overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  transition: all 0.3s; scroll-snap-align: start; cursor: pointer;
+}
+.carousel-card:hover { box-shadow: 0 12px 32px rgba(0,88,190,0.15); transform: translateY(-4px); }
+.carousel-img-wrap { position: relative; width: 100%; height: 220px; overflow: hidden; background: #eceef0; }
+.carousel-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
+.carousel-card:hover .carousel-img { transform: scale(1.08); }
+.carousel-fallback { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 4rem; background: #eceef0; }
+.carousel-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(9,20,38,0.85) 0%, rgba(9,20,38,0.2) 50%, transparent 100%); }
+.carousel-badge-top-left { position: absolute; top: 12px; left: 12px; background: rgba(255,255,255,0.92); color: #091426; font-size: 11px; padding: 4px 10px; border-radius: 99px; font-weight: 600; }
+.carousel-title-wrap { position: absolute; bottom: 12px; right: 12px; left: 12px; color: #fff; }
+.carousel-year { font-size: 11px; color: #d8e2ff; display: block; margin-bottom: 4px; }
+.carousel-title { font-size: 15px; font-weight: 700; line-height: 1.4; -webkit-line-clamp: 1; display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; }
+@media (max-width: 640px) {
+  .carousel-card { flex: 0 0 85vw; max-width: 85vw; }
+  .carousel-img-wrap { height: 200px; }
+}
 </style>
 </head>
 <body class="bg-surface font-body-md text-body-md text-on-surface antialiased">
 
-<!-- ==================== HEADER ==================== -->
-<header class="fixed top-0 left-0 right-0 w-full z-50 bg-surface-container-lowest/95 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] border-b border-surface-container-high">
-  <div class="h-20 max-w-7xl mx-auto px-gutter flex items-center justify-between gap-space-md">
-    <a href="#" class="flex items-center gap-space-sm group">
-      <div class="w-10 h-10 rounded-full bg-secondary text-on-secondary flex items-center justify-center font-bold">AN</div>
-      <div class="flex flex-col text-right">
-        <span class="font-title-card text-title-card text-primary">أكاديميا نكست</span>
-        <span class="font-label-badge text-label-badge text-on-surface-variant font-normal">بوابة التعليم والقبول الأكاديمي</span>
+<!-- HEADER -->
+<header class="fixed top-0 left-0 right-0 w-full z-50 bg-white/95 backdrop-blur-xl border-b border-surface-container-high">
+  <div class="h-16 sm:h-20 max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between gap-2 sm:gap-4">
+    <a href="#" class="flex items-center gap-2 sm:gap-3 group">
+      <img id="brandLogo" src="" alt="logo" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover bg-secondary text-white flex-shrink-0" style="display:none">
+      <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-secondary text-white flex items-center justify-center font-bold flex-shrink-0" id="brandLogoFallback">AN</div>
+      <div class="flex flex-col text-right min-w-0">
+        <span class="font-bold text-sm sm:text-base text-primary truncate" id="brandName">أكاديميا نكست</span>
+        <span class="text-[10px] sm:text-xs text-on-surface-variant font-normal truncate hidden sm:block" id="brandTagline">بوابة التعليم والقبول الأكاديمي</span>
       </div>
     </a>
-    <nav class="hidden xl:flex items-center gap-space-md">
-      <a class="text-on-surface-variant hover:text-secondary py-space-xs font-body-md" href="#home">الرئيسية</a>
-      <a class="text-on-surface-variant hover:text-secondary py-space-xs font-body-md" href="#about">من نحن</a>
-      <a class="text-on-surface-variant hover:text-secondary py-space-xs font-body-md" href="#universities">الجامعات</a>
-      <a class="text-on-surface-variant hover:text-secondary py-space-xs font-body-md" href="#news">آخر الأخبار</a>
-      <a class="text-on-surface-variant hover:text-secondary py-space-xs font-body-md" href="gallery.html">معرض الصور</a>
-      <a class="text-on-surface-variant hover:text-secondary py-space-xs font-body-md" href="#contact">اتصل بنا</a>
-      <a class="text-on-surface-variant hover:text-secondary py-space-xs font-body-md" href="admin.html">لوحة التحكم</a>
+    <nav class="hidden xl:flex items-center gap-4">
+      <a class="text-on-surface-variant hover:text-secondary py-2 text-sm" href="#home">الرئيسية</a>
+      <a class="text-on-surface-variant hover:text-secondary py-2 text-sm" href="#about">من نحن</a>
+      <a class="text-on-surface-variant hover:text-secondary py-2 text-sm" href="#universities">الجامعات</a>
+      <a class="text-on-surface-variant hover:text-secondary py-2 text-sm" href="#news">آخر الأخبار</a>
+      <a class="text-on-surface-variant hover:text-secondary py-2 text-sm" href="gallery.html">معرض الصور</a>
+      <a class="text-on-surface-variant hover:text-secondary py-2 text-sm" href="#contact">اتصل بنا</a>
+      <a class="text-on-surface-variant hover:text-secondary py-2 text-sm" href="admin.html">لوحة التحكم</a>
     </nav>
-    <div class="flex items-center gap-space-sm">
-      <a href="#contact" class="hidden sm:inline-flex items-center px-space-lg py-space-sm bg-secondary text-on-secondary rounded-full font-headline-sm text-body-sm shadow hover:opacity-90">قدّم طلبك الآن</a>
+    <div class="flex items-center gap-2">
+      <a href="#contact" class="hidden sm:inline-flex items-center px-4 lg:px-6 py-2 bg-secondary text-white rounded-full text-xs sm:text-sm shadow hover:opacity-90 transition">قدّم طلبك</a>
+      <button id="mobileMenuBtn" class="xl:hidden p-2 text-on-surface-variant hover:text-primary rounded-lg">
+        <span class="material-symbols-outlined text-[26px]">menu</span>
+      </button>
     </div>
   </div>
+  <!-- Mobile menu -->
+  <nav id="mobileMenu" class="xl:hidden hidden bg-white border-t border-surface-container-high px-4 py-3">
+    <a class="block py-2 text-on-surface-variant hover:text-secondary text-sm" href="#home">الرئيسية</a>
+    <a class="block py-2 text-on-surface-variant hover:text-secondary text-sm" href="#about">من نحن</a>
+    <a class="block py-2 text-on-surface-variant hover:text-secondary text-sm" href="#universities">الجامعات</a>
+    <a class="block py-2 text-on-surface-variant hover:text-secondary text-sm" href="#news">آخر الأخبار</a>
+    <a class="block py-2 text-on-surface-variant hover:text-secondary text-sm" href="gallery.html">معرض الصور</a>
+    <a class="block py-2 text-on-surface-variant hover:text-secondary text-sm" href="#contact">اتصل بنا</a>
+    <a class="block py-2 text-on-surface-variant hover:text-secondary text-sm" href="admin.html">لوحة التحكم</a>
+  </nav>
 </header>
 
-<main class="w-full pt-20 bg-surface min-h-screen">
+<main class="w-full pt-16 sm:pt-20 bg-surface min-h-screen">
 
-<!-- ==================== HERO ==================== -->
-<section id="home" class="relative w-full overflow-hidden bg-gradient-to-b from-primary via-primary-container to-surface text-on-primary pb-space-xl pt-space-xl lg:pb-32">
-  <div class="absolute -top-32 right-1/4 w-96 h-96 bg-secondary/20 rounded-full blur-3xl pointer-events-none"></div>
-  <div class="max-w-7xl mx-auto px-gutter relative z-10">
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-center">
-      <div class="lg:col-span-7 flex flex-col gap-space-lg text-right">
-        <div class="inline-flex items-center gap-space-xs px-space-md py-space-xs rounded-full bg-white/10 backdrop-blur-md self-start text-secondary-fixed">
-          <span class="w-2.5 h-2.5 rounded-full bg-secondary animate-pulse"></span>
-          <span class="font-label-badge">القبول الجامعي الأكاديمي الدولي المعتمد</span>
+<!-- HERO -->
+<section id="home" class="relative w-full overflow-hidden bg-gradient-to-b from-primary via-primary-container to-surface text-white pb-12 sm:pb-20 lg:pb-32 pt-10 sm:pt-16">
+  <div class="absolute -top-32 right-1/4 w-64 sm:w-96 h-64 sm:h-96 bg-secondary/20 rounded-full blur-3xl pointer-events-none"></div>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+      <div class="lg:col-span-7 flex flex-col gap-4 sm:gap-6 text-right">
+        <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md self-start text-secondary-fixed text-xs sm:text-sm">
+          <span class="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-secondary animate-pulse"></span>
+          <span id="heroBadge">القبول الجامعي الأكاديمي الدولي المعتمد</span>
         </div>
-        <h1 class="font-display-hero text-4xl lg:text-[46px] leading-tight text-on-primary">
+        <h1 class="text-2xl sm:text-3xl lg:text-[46px] leading-tight font-extrabold" id="heroTitle">
           بوابتك الأكاديمية الأولى نحو مستقبل جامعي معتمد دولياً
         </h1>
-        <p class="font-body-lg text-primary-fixed-dim max-w-2xl leading-relaxed">
-          نساعد آلاف الطلاب العرب والدوليين في نيل قبولات جامعية فورية، واستشارات تعليمية دقيقة، ومرافقة متكاملة من ملف التقديم وحتى استلام مقعد الدراسة.
+        <p class="text-sm sm:text-base lg:text-lg text-primary-fixed-dim max-w-2xl leading-relaxed" id="heroSubtitle">
+          نساعد آلاف الطلاب العرب والدوليين في نيل قبولات جامعية فورية، واستشارات تعليمية دقيقة، ومرافقة متكاملة.
         </p>
-        <div class="flex items-center gap-space-md flex-wrap pt-space-xs">
-          <a href="#universities" class="px-space-lg py-space-sm bg-secondary text-on-secondary rounded-full font-headline-sm shadow-xl hover:opacity-90">استكشف التخصصات</a>
-          <a href="#contact" class="px-space-lg py-space-sm bg-white/10 hover:bg-white/20 text-on-primary rounded-full font-headline-sm backdrop-blur-md">احجز استشارة مجانية</a>
+        <div class="flex flex-col sm:flex-row gap-3 pt-2">
+          <a href="#universities" class="px-6 py-3 bg-secondary text-white rounded-full font-bold text-sm shadow-xl hover:opacity-90 transition text-center" id="heroBtn1">استكشف التخصصات</a>
+          <a href="#contact" class="px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-full font-bold text-sm backdrop-blur-md transition text-center" id="heroBtn2">احجز استشارة مجانية</a>
         </div>
       </div>
-      <div class="lg:col-span-5 relative flex justify-center">
+      <div class="lg:col-span-5 flex justify-center">
         <div class="w-full max-w-md rounded-2xl overflow-hidden shadow-2xl bg-white/5 p-2">
-          <div class="w-full h-80 rounded-xl bg-gradient-to-br from-secondary to-tertiary-container flex items-center justify-center text-on-secondary text-6xl font-bold">🎓</div>
+          <div class="w-full aspect-square rounded-xl bg-gradient-to-br from-secondary to-tertiary-container flex items-center justify-center text-white text-6xl sm:text-8xl font-bold">🎓</div>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ==================== ANNOUNCEMENT TICKER ==================== -->
-<section id="ticker" class="w-full bg-secondary text-on-secondary shadow-md hidden">
-  <div class="max-w-7xl mx-auto px-gutter py-space-sm flex items-center justify-between gap-space-sm">
-    <div class="flex items-center gap-space-sm">
-      <span class="px-space-sm py-1 bg-white text-secondary rounded-full font-label-badge">📢 إعلان</span>
-      <p id="tickerText" class="font-body-md text-on-secondary"></p>
+<!-- TICKER -->
+<section id="ticker" class="w-full bg-secondary text-white shadow-md hidden">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-col sm:flex-row items-center justify-between gap-2">
+    <div class="flex items-center gap-2 w-full sm:w-auto">
+      <span class="px-3 py-1 bg-white text-secondary rounded-full text-xs flex-shrink-0">📢 إعلان</span>
+      <p id="tickerText" class="text-sm text-white"></p>
     </div>
-    <a id="tickerLink" href="#" class="px-space-md py-1 bg-white/15 hover:bg-white/30 rounded-full font-label-badge">عرض التفاصيل ←</a>
+    <a id="tickerLink" href="#" class="px-4 py-1 bg-white/15 hover:bg-white/30 rounded-full text-xs flex-shrink-0">عرض التفاصيل ←</a>
   </div>
 </section>
 
-<!-- ==================== ABOUT ==================== -->
-<section id="about" class="w-full py-space-xl lg:py-24 bg-surface">
-  <div class="max-w-7xl mx-auto px-gutter">
-    <div class="flex flex-col items-center text-center max-w-3xl mx-auto mb-space-xl">
-      <span class="px-space-md py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed-variant font-label-badge mb-space-xs">لماذا تختار أكاديميا نكست؟</span>
-      <h2 class="font-headline-lg text-3xl text-primary">شريكك الأكاديمي الموثوق خطوة بخطوة نحو العالمية</h2>
-      <p class="font-body-lg text-on-surface-variant mt-space-xs">نرسّخ مفهوماً حديثاً للاستشارات الجامعية؛ نبسط الإجراءات الحكومية، نضمن صحة الوثائق، ونرافقك داخل الحرم الجامعي.</p>
+<!-- ABOUT -->
+<section id="about" class="w-full py-12 sm:py-16 lg:py-24 bg-surface">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6">
+    <div class="text-center max-w-3xl mx-auto mb-8 sm:mb-12">
+      <span class="inline-block px-4 py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed-variant text-xs sm:text-sm mb-3">لماذا تختارنا؟</span>
+      <h2 class="text-2xl sm:text-3xl text-primary font-bold" id="aboutTitle">شريكك الأكاديمي الموثوق خطوة بخطوة نحو العالمية</h2>
+      <p class="text-sm sm:text-base text-on-surface-variant mt-3" id="aboutSubtitle">نرسّخ مفهوماً حديثاً للاستشارات الجامعية؛ نبسط الإجراءات الحكومية.</p>
     </div>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter">
-      <div class="bg-white rounded-2xl p-space-lg shadow-sm hover:shadow-xl transition-all">
-        <div class="w-14 h-14 rounded-xl bg-secondary-fixed flex items-center justify-center text-secondary text-2xl mb-3">✓</div>
-        <h3 class="font-title-card text-primary mb-2">اعتماد وتوثيق رسمي</h3>
-        <p class="font-body-md text-on-surface-variant">علاقات تعاقدية مباشرة مع مكاتب القبول بالجامعات الحكومية والخاصة والدولية.</p>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+      <div class="bg-white rounded-2xl p-5 sm:p-6 shadow-sm hover:shadow-xl transition-all">
+        <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-secondary-fixed flex items-center justify-center text-secondary text-xl mb-3">✓</div>
+        <h3 class="font-bold text-primary mb-2 text-sm sm:text-base" id="aboutC1Title">اعتماد وتوثيق رسمي</h3>
+        <p class="text-xs sm:text-sm text-on-surface-variant" id="aboutC1Desc">علاقات تعاقدية مباشرة مع مكاتب القبول.</p>
       </div>
-      <div class="bg-white rounded-2xl p-space-lg shadow-sm hover:shadow-xl transition-all">
-        <div class="w-14 h-14 rounded-xl bg-primary-fixed flex items-center justify-center text-primary text-2xl mb-3">🧠</div>
-        <h3 class="font-title-card text-primary mb-2">توجيه أكاديمي مخصص</h3>
-        <p class="font-body-md text-on-surface-variant">جلسات تقييم فردية لتحليل ميول الطالب وقدراته واختيار التخصص الأنسب.</p>
+      <div class="bg-white rounded-2xl p-5 sm:p-6 shadow-sm hover:shadow-xl transition-all">
+        <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-primary-fixed flex items-center justify-center text-primary text-xl mb-3">🧠</div>
+        <h3 class="font-bold text-primary mb-2 text-sm sm:text-base" id="aboutC2Title">توجيه أكاديمي مخصص</h3>
+        <p class="text-xs sm:text-sm text-on-surface-variant" id="aboutC2Desc">جلسات تقييم فردية لتحليل ميول الطالب.</p>
       </div>
-      <div class="bg-white rounded-2xl p-space-lg shadow-sm hover:shadow-xl transition-all">
-        <div class="w-14 h-14 rounded-xl bg-tertiary-fixed flex items-center justify-center text-tertiary-container text-2xl mb-3">✈</div>
-        <h3 class="font-title-card text-primary mb-2">استقبال وخدمات إقامة</h3>
-        <p class="font-body-md text-on-surface-variant">استقبال المطار، توفير سكن طلابي آمن، والمساعدة في استخراج الإقامات.</p>
+      <div class="bg-white rounded-2xl p-5 sm:p-6 shadow-sm hover:shadow-xl transition-all">
+        <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-tertiary-fixed flex items-center justify-center text-tertiary-container text-xl mb-3">✈</div>
+        <h3 class="font-bold text-primary mb-2 text-sm sm:text-base" id="aboutC3Title">استقبال وخدمات إقامة</h3>
+        <p class="text-xs sm:text-sm text-on-surface-variant" id="aboutC3Desc">استقبال المطار، وتوفير سكن طلابي آمن.</p>
       </div>
-      <div class="bg-white rounded-2xl p-space-lg shadow-sm hover:shadow-xl transition-all">
-        <div class="w-14 h-14 rounded-xl bg-secondary-fixed-dim flex items-center justify-center text-secondary text-2xl mb-3">💬</div>
-        <h3 class="font-title-card text-primary mb-2">متابعة أكاديمية مستمرة</h3>
-        <p class="font-body-md text-on-surface-variant">فريق متواجد طوال فصول الدراسة لحل المشكلات وتقديم المساعدة.</p>
+      <div class="bg-white rounded-2xl p-5 sm:p-6 shadow-sm hover:shadow-xl transition-all">
+        <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-secondary-fixed flex items-center justify-center text-secondary text-xl mb-3">💬</div>
+        <h3 class="font-bold text-primary mb-2 text-sm sm:text-base" id="aboutC4Title">متابعة أكاديمية مستمرة</h3>
+        <p class="text-xs sm:text-sm text-on-surface-variant" id="aboutC4Desc">فريق متواجد طوال فصول الدراسة.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ==================== UNIVERSITIES ==================== -->
-<section id="universities" class="w-full py-space-xl lg:py-24 bg-surface-container-low">
-  <div class="max-w-7xl mx-auto px-gutter">
-    <div class="flex flex-col md:flex-row md:items-end justify-between mb-space-xl gap-space-md text-right">
+<!-- UNIVERSITIES -->
+<section id="universities" class="w-full py-12 sm:py-16 lg:py-24 bg-surface-container-low">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6">
+    <div class="flex flex-col md:flex-row md:items-end justify-between mb-8 sm:mb-12 gap-4 text-right">
       <div>
-        <span class="px-space-md py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed-variant font-label-badge mb-space-xs inline-block">الوجهات الأكاديمية الشريكة</span>
-        <h2 class="font-headline-lg text-3xl text-primary">أفضل الجامعات والبرامج الدولية المتاحة</h2>
-        <p class="font-body-md text-on-surface-variant mt-1">برامج معتمدة من وزارة التعليم العالي وهيئات الاعتماد الأكاديمي الدولي</p>
+        <span class="inline-block px-4 py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed-variant text-xs sm:text-sm mb-2">الوجهات الأكاديمية</span>
+        <h2 class="text-2xl sm:text-3xl text-primary font-bold" id="universitiesTitle">أفضل الجامعات والبرامج الدولية</h2>
+        <p class="text-sm text-on-surface-variant mt-2" id="universitiesSubtitle">برامج معتمدة من وزارة التعليم العالي</p>
       </div>
     </div>
-    <div id="universitiesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter"></div>
+    <div id="universitiesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"></div>
     <div id="universitiesEmpty" class="hidden text-center py-12 text-on-surface-variant">لا توجد جامعات مضافة بعد</div>
   </div>
 </section>
 
-<!-- ==================== NEWS ==================== -->
-<section id="news" class="w-full py-space-xl lg:py-24 bg-surface">
-  <div class="max-w-7xl mx-auto px-gutter">
-    <div class="flex flex-col md:flex-row md:items-end justify-between mb-space-xl gap-space-md text-right">
+<!-- NEWS -->
+<section id="news" class="w-full py-12 sm:py-16 lg:py-24 bg-surface">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6">
+    <div class="flex flex-col md:flex-row md:items-end justify-between mb-8 sm:mb-12 gap-4 text-right">
       <div>
-        <span class="px-space-md py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed-variant font-label-badge mb-space-xs inline-block">مركز الأخبار والقرارات</span>
-        <h2 class="font-headline-lg text-3xl text-primary">آخر الأخبار وتحديثات القبول</h2>
+        <span class="inline-block px-4 py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed-variant text-xs sm:text-sm mb-2" id="newsSubtitle">مركز الأخبار والقرارات</span>
+        <h2 class="text-2xl sm:text-3xl text-primary font-bold" id="newsTitle">آخر الأخبار وتحديثات القبول</h2>
       </div>
-      <a href="gallery.html" class="font-headline-sm text-body-md text-secondary hover:underline">أرشيف الأخبار ←</a>
     </div>
-    <div id="newsGrid" class="grid grid-cols-1 lg:grid-cols-12 gap-gutter"></div>
+    <div id="newsGrid" class="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6"></div>
     <div id="newsEmpty" class="hidden text-center py-12 text-on-surface-variant">لا توجد أخبار منشورة بعد</div>
   </div>
 </section>
 
-<!-- ==================== GALLERY PREVIEW ==================== -->
-<section id="gallery-preview" class="w-full py-space-xl lg:py-24 bg-surface-container-low">
-  <div class="max-w-7xl mx-auto px-gutter">
-    <div class="flex flex-col md:flex-row md:items-end justify-between mb-space-xl gap-space-md text-right">
+<!-- GALLERY PREVIEW -->
+<section id="gallery-preview" class="w-full py-12 sm:py-16 lg:py-24 bg-surface-container-low">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6">
+    <div class="flex flex-col md:flex-row md:items-end justify-between mb-6 sm:mb-12 gap-4 text-right">
       <div>
-        <span class="px-space-md py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed-variant font-label-badge mb-space-xs inline-block">معرض الصور والفعاليات</span>
-        <h2 class="font-headline-lg text-3xl text-primary">الحياة الجامعية بأنظار طلابنا</h2>
-        <p class="font-body-md text-on-surface-variant mt-1">لقطات حية توثق رحلة الاستقبال، الحفلات التعريفية، والمعامل التخصصية</p>
+        <span class="inline-block px-4 py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed-variant text-xs sm:text-sm mb-2" id="gallerySubtitle">معرض الصور</span>
+        <h2 class="text-2xl sm:text-3xl text-primary font-bold" id="galleryTitle">الحياة الجامعية بأنظار طلابنا</h2>
       </div>
-      <a href="gallery.html" class="px-space-lg py-space-xs bg-white text-secondary rounded-full font-headline-sm shadow-sm hover:bg-secondary hover:text-on-secondary">عرض ألبوم الصور الكامل ←</a>
+      <a href="gallery.html" class="px-4 sm:px-6 py-2 bg-white text-secondary rounded-full text-xs sm:text-sm font-semibold shadow-sm hover:bg-secondary hover:text-white transition">عرض الكل ←</a>
     </div>
-    <div id="galleryGrid" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-space-md"></div>
+    <div id="galleryGrid" class="carousel-track"></div>
     <div id="galleryEmpty" class="hidden text-center py-12 text-on-surface-variant">لا توجد صور بعد</div>
   </div>
 </section>
 
-<!-- ==================== CONTACT FORM ==================== -->
-<section id="contact" class="w-full py-space-xl lg:py-24 bg-surface">
-  <div class="max-w-7xl mx-auto px-gutter">
-    <div class="bg-primary rounded-3xl overflow-hidden shadow-2xl text-on-primary grid grid-cols-1 lg:grid-cols-12">
-      <div class="lg:col-span-5 p-space-xl lg:p-14 bg-primary-container flex flex-col justify-between gap-space-lg text-right">
-        <div class="flex flex-col gap-space-md">
-          <span class="px-space-md py-1 rounded-full bg-secondary text-on-secondary font-label-badge self-start">تواصل فوري ومباشر</span>
-          <h2 class="font-headline-lg text-3xl text-on-primary">جاهز لبدء رحلتك الجامعية؟</h2>
-          <p class="font-body-md text-primary-fixed-dim">اترك بياناتك وسيتواصل معك أحد مستشاري القبول خلال أقل من ساعتين.</p>
-          <div class="flex flex-col gap-space-md pt-space-sm">
-            <div class="flex items-center gap-space-md">
-              <div class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center text-secondary-fixed text-xl">📞</div>
-              <div class="flex flex-col">
-                <span class="font-label-badge text-primary-fixed-dim">الخط الساخن</span>
-                <span class="font-headline-sm text-on-primary" dir="ltr" id="cPhone">—</span>
+<!-- CONTACT -->
+<section id="contact" class="w-full py-12 sm:py-16 lg:py-24 bg-surface">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6">
+    <div class="bg-primary rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl text-white grid grid-cols-1 lg:grid-cols-12">
+      <div class="lg:col-span-5 p-6 sm:p-10 lg:p-14 bg-primary-container flex flex-col justify-between gap-6 text-right">
+        <div class="flex flex-col gap-4">
+          <span class="inline-block px-4 py-1 rounded-full bg-secondary text-white text-xs sm:text-sm self-start">تواصل فوري</span>
+          <h2 class="text-2xl sm:text-3xl text-white font-bold" id="contactTitle">جاهز لبدء رحلتك الجامعية؟</h2>
+          <p class="text-sm sm:text-base text-primary-fixed-dim" id="contactSubtitle">اترك بياناتك وسيتواصل معك مستشار القبول.</p>
+          <div class="flex flex-col gap-4 pt-2">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-white/10 flex items-center justify-center text-secondary-fixed text-lg flex-shrink-0">📞</div>
+              <div class="flex flex-col min-w-0">
+                <span class="text-xs text-primary-fixed-dim">الهاتف</span>
+                <span class="text-sm sm:text-base text-white truncate" dir="ltr" id="cPhone">—</span>
               </div>
             </div>
-            <div class="flex items-center gap-space-md">
-              <div class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center text-secondary-fixed text-xl">✉</div>
-              <div class="flex flex-col">
-                <span class="font-label-badge text-primary-fixed-dim">البريد الإلكتروني</span>
-                <span class="font-headline-sm text-on-primary" id="cEmail">—</span>
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-white/10 flex items-center justify-center text-secondary-fixed text-lg flex-shrink-0">✉</div>
+              <div class="flex flex-col min-w-0">
+                <span class="text-xs text-primary-fixed-dim">البريد</span>
+                <span class="text-sm sm:text-base text-white truncate" id="cEmail">—</span>
               </div>
             </div>
-            <div class="flex items-center gap-space-md">
-              <div class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center text-secondary-fixed text-xl">📍</div>
-              <div class="flex flex-col">
-                <span class="font-label-badge text-primary-fixed-dim">العنوان</span>
-                <span class="font-body-md text-on-primary" id="cAddress">—</span>
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-white/10 flex items-center justify-center text-secondary-fixed text-lg flex-shrink-0">📍</div>
+              <div class="flex flex-col min-w-0">
+                <span class="text-xs text-primary-fixed-dim">العنوان</span>
+                <span class="text-sm text-white" id="cAddress">—</span>
               </div>
             </div>
           </div>
         </div>
       </div>
-      <div class="lg:col-span-7 p-space-xl lg:p-14 bg-surface-container-lowest text-on-surface text-right">
-        <h3 class="font-headline-md text-2xl text-primary mb-1">طلب تقييم القبول الأكاديمي المجاني</h3>
-        <p class="font-body-sm text-on-surface-variant mb-space-lg">املأ النموذج وسنتواصل معك</p>
-        <form id="contactForm" class="flex flex-col gap-space-md" onsubmit="event.preventDefault();this.classList.add('hidden');document.getElementById('contactSuccess').classList.remove('hidden')">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-space-md">
-            <input required class="w-full px-space-md py-2.5 bg-surface-container-low rounded-xl focus:outline-none" placeholder="الاسم الكامل *" type="text">
-            <input required class="w-full px-space-md py-2.5 bg-surface-container-low rounded-xl focus:outline-none" placeholder="رقم الهاتف *" dir="ltr" type="tel">
+      <div class="lg:col-span-7 p-6 sm:p-10 lg:p-14 bg-white text-on-surface text-right">
+        <h3 class="text-xl sm:text-2xl text-primary font-bold mb-2">طلب تقييم مجاني</h3>
+        <p class="text-sm text-on-surface-variant mb-6">املأ النموذج وسنتواصل معك</p>
+        <form id="contactForm" class="flex flex-col gap-3" onsubmit="event.preventDefault();this.classList.add('hidden');document.getElementById('contactSuccess').classList.remove('hidden')">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <input required class="w-full px-4 py-2.5 bg-surface-container-low rounded-xl focus:outline-none text-sm" placeholder="الاسم الكامل *" type="text">
+            <input required class="w-full px-4 py-2.5 bg-surface-container-low rounded-xl focus:outline-none text-sm" placeholder="الهاتف *" dir="ltr" type="tel">
           </div>
-          <input required class="w-full px-space-md py-2.5 bg-surface-container-low rounded-xl focus:outline-none" placeholder="البريد الإلكتروني *" dir="ltr" type="email">
-          <input class="w-full px-space-md py-2.5 bg-surface-container-low rounded-xl focus:outline-none" placeholder="التخصص المراد دراسته">
-          <textarea class="w-full px-space-md py-2 bg-surface-container-low rounded-xl focus:outline-none resize-none" placeholder="ملاحظات إضافية" rows="3"></textarea>
-          <button class="w-full py-space-sm bg-secondary hover:opacity-90 text-on-secondary rounded-xl font-headline-sm" type="submit">إرسال الطلب</button>
+          <input required class="w-full px-4 py-2.5 bg-surface-container-low rounded-xl focus:outline-none text-sm" placeholder="البريد الإلكتروني *" dir="ltr" type="email">
+          <input class="w-full px-4 py-2.5 bg-surface-container-low rounded-xl focus:outline-none text-sm" placeholder="التخصص المراد دراسته">
+          <textarea class="w-full px-4 py-2 bg-surface-container-low rounded-xl focus:outline-none resize-none text-sm" placeholder="ملاحظات" rows="3"></textarea>
+          <button class="w-full py-3 bg-secondary hover:opacity-90 text-white rounded-xl font-semibold text-sm" type="submit">إرسال الطلب</button>
         </form>
-        <div id="contactSuccess" class="hidden flex-col items-center justify-center text-center p-space-xl bg-surface-container-low rounded-2xl gap-space-sm">
+        <div id="contactSuccess" class="hidden flex-col items-center justify-center text-center p-8 bg-surface-container-low rounded-2xl gap-3">
           <div class="text-5xl text-secondary">✓</div>
-          <h4 class="font-headline-md text-primary">تم استلام طلبك!</h4>
-          <p class="font-body-md text-on-surface-variant">سيتواصل معك المستشار قريبًا.</p>
+          <h4 class="text-primary font-bold text-lg">تم استلام طلبك!</h4>
+          <p class="text-sm text-on-surface-variant">سيتواصل معك المستشار قريبًا.</p>
         </div>
       </div>
     </div>
@@ -252,50 +293,52 @@ tailwind.config = { darkMode:"class", theme:{ extend:{
 
 </main>
 
-<!-- ==================== FOOTER ==================== -->
-<footer class="w-full bg-surface-container-lowest border-t border-surface-container-high pt-space-xl pb-space-lg text-on-surface">
-  <div class="max-w-7xl mx-auto px-gutter">
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-gutter pb-space-xl">
-      <div class="lg:col-span-2 flex flex-col gap-space-md">
-        <div class="flex items-center gap-space-sm">
-          <div class="w-10 h-10 rounded-full bg-secondary text-on-secondary flex items-center justify-center font-bold">AN</div>
+<!-- FOOTER -->
+<footer class="w-full bg-white border-t border-surface-container-high pt-10 sm:pt-14 pb-6 sm:pb-8 text-on-surface">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 sm:gap-8 pb-8 sm:pb-10">
+      <div class="lg:col-span-2 flex flex-col gap-4">
+        <div class="flex items-center gap-2">
+          <div class="w-10 h-10 rounded-full bg-secondary text-white flex items-center justify-center font-bold">AN</div>
           <div class="flex flex-col text-right">
-            <span class="font-title-card text-primary">أكاديميا نكست</span>
-            <span class="font-label-badge text-on-surface-variant">Academia Next Portal</span>
+            <span class="text-primary font-bold text-sm sm:text-base" id="brandNameFooter">أكاديميا نكست</span>
+            <span class="text-on-surface-variant text-[10px] sm:text-xs">Academia Next Portal</span>
           </div>
         </div>
-        <p class="font-body-md text-on-surface-variant leading-relaxed max-w-sm">بوابة أكاديمية شاملة معتمدة دولياً تهدف إلى تسهيل قبول الطلاب الجامعيين وتقديم الاستشارات التعليمية الموثوقة.</p>
-        <div class="flex items-center gap-space-sm pt-space-xs" id="socialLinks"></div>
+        <p class="text-xs sm:text-sm text-on-surface-variant leading-relaxed max-w-sm" id="brandDescFooter">
+          بوابة أكاديمية شاملة معتمدة دولياً تهدف إلى تسهيل قبول الطلاب الجامعيين.
+        </p>
+        <div class="flex items-center gap-2 pt-1" id="socialLinks"></div>
       </div>
-      <div class="flex flex-col gap-space-sm">
-        <h3 class="font-headline-sm text-primary mb-space-xs">روابط سريعة</h3>
-        <ul class="flex flex-col gap-space-sm text-on-surface-variant font-body-md">
+      <div>
+        <h3 class="font-bold text-primary mb-3 text-sm sm:text-base">روابط سريعة</h3>
+        <ul class="flex flex-col gap-2 text-on-surface-variant text-xs sm:text-sm">
           <li><a href="#about" class="hover:text-secondary">من نحن</a></li>
           <li><a href="#universities" class="hover:text-secondary">الجامعات</a></li>
           <li><a href="#news" class="hover:text-secondary">الأخبار</a></li>
           <li><a href="gallery.html" class="hover:text-secondary">معرض الصور</a></li>
         </ul>
       </div>
-      <div class="flex flex-col gap-space-sm">
-        <h3 class="font-headline-sm text-primary mb-space-xs">المصادر</h3>
-        <ul class="flex flex-col gap-space-sm text-on-surface-variant font-body-md">
+      <div>
+        <h3 class="font-bold text-primary mb-3 text-sm sm:text-base">المصادر</h3>
+        <ul class="flex flex-col gap-2 text-on-surface-variant text-xs sm:text-sm">
           <li><a href="#" class="hover:text-secondary">الأسئلة الشائعة</a></li>
           <li><a href="#" class="hover:text-secondary">سياسة الخصوصية</a></li>
-          <li><a href="#" class="hover:text-secondary">الشروط والأحكام</a></li>
+          <li><a href="#" class="hover:text-secondary">الشروط</a></li>
         </ul>
       </div>
-      <div class="flex flex-col gap-space-sm">
-        <h3 class="font-headline-sm text-primary mb-space-xs">معلومات الاتصال</h3>
-        <ul class="flex flex-col gap-space-sm text-on-surface-variant font-body-md">
+      <div>
+        <h3 class="font-bold text-primary mb-3 text-sm sm:text-base">تواصل</h3>
+        <ul class="flex flex-col gap-2 text-on-surface-variant text-xs sm:text-sm">
           <li id="fAddress">—</li>
           <li id="fPhone" dir="ltr">—</li>
           <li id="fEmail">—</li>
         </ul>
       </div>
     </div>
-    <div class="pt-space-lg border-t border-surface-container flex flex-col sm:flex-row items-center justify-between gap-space-md text-on-surface-variant font-body-sm">
-      <p>© 2025 أكاديميا نكست. جميع الحقوق محفوظة.</p>
-      <div class="flex items-center gap-space-md">
+    <div class="pt-6 border-t border-surface-container flex flex-col sm:flex-row items-center justify-between gap-3 text-on-surface-variant text-xs sm:text-sm text-center sm:text-right">
+      <p id="footerCopyright">© 2025 أكاديميا نكست. جميع الحقوق محفوظة.</p>
+      <div class="flex items-center gap-3">
         <a href="#" class="hover:text-secondary">الشروط</a>
         <span>•</span>
         <a href="#" class="hover:text-secondary">الخصوصية</a>
@@ -303,6 +346,16 @@ tailwind.config = { darkMode:"class", theme:{ extend:{
     </div>
   </div>
 </footer>
+
+<script>
+// Mobile menu toggle
+document.getElementById('mobileMenuBtn').onclick = () => {
+  document.getElementById('mobileMenu').classList.toggle('hidden');
+};
+document.querySelectorAll('#mobileMenu a').forEach(a => {
+  a.onclick = () => document.getElementById('mobileMenu').classList.add('hidden');
+});
+</script>
 
 <script type="module" src="site.js"></script>
 </body>
