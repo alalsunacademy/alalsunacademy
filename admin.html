@@ -1,124 +1,56 @@
-function renderSettings() {
-  const get = k => (DATA.settings.find(s => s.key === k) || {}).value || '';
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>لوحة التحكم — أكاديميا نكست</title>
+<link rel="stylesheet" href="admin.css">
+</head>
+<body>
 
-  const groups = [
-    {
-      title: '🏷️ الهوية والشعار',
-      fields: [
-        ['brand_name', 'اسم الأكاديمية'],
-        ['brand_tagline', 'الوصف القصير'],
-        ['brand_logo_url', 'رابط الشعار (URL) أو ارفع صورة'],
-        ['brand_description', 'وصف الفوتر'],
-      ]
-    },
-    {
-      title: '🎯 القسم الرئيسي (Hero)',
-      fields: [
-        ['hero_badge', 'الشارة الصغيرة'],
-        ['hero_title', 'العنوان الرئيسي'],
-        ['hero_subtitle', 'الوصف'],
-        ['hero_btn1_text', 'نص الزر الأول'],
-        ['hero_btn2_text', 'نص الزر الثاني'],
-      ]
-    },
-    {
-      title: '📖 قسم "من نحن"',
-      fields: [
-        ['about_title', 'العنوان'],
-        ['about_subtitle', 'الوصف'],
-        ['about_card1_title', 'كارت 1 — العنوان'],
-        ['about_card1_desc', 'كارت 1 — الوصف'],
-        ['about_card2_title', 'كارت 2 — العنوان'],
-        ['about_card2_desc', 'كارت 2 — الوصف'],
-        ['about_card3_title', 'كارت 3 — العنوان'],
-        ['about_card3_desc', 'كارت 3 — الوصف'],
-        ['about_card4_title', 'كارت 4 — العنوان'],
-        ['about_card4_desc', 'كارت 4 — الوصف'],
-      ]
-    },
-    {
-      title: '🏛️ قسم الجامعات',
-      fields: [
-        ['universities_title', 'العنوان'],
-        ['universities_subtitle', 'الوصف'],
-      ]
-    },
-    {
-      title: '📰 قسم الأخبار',
-      fields: [
-        ['news_title', 'العنوان'],
-        ['news_subtitle', 'الوصف'],
-      ]
-    },
-    {
-      title: '🖼️ قسم معرض الصور',
-      fields: [
-        ['gallery_title', 'العنوان'],
-        ['gallery_subtitle', 'الوصف'],
-      ]
-    },
-    {
-      title: '📞 قسم التواصل',
-      fields: [
-        ['contact_title', 'العنوان'],
-        ['contact_subtitle', 'الوصف'],
-        ['contact_phone', 'الهاتف'],
-        ['contact_email', 'الإيميل'],
-        ['contact_address', 'العنوان'],
-      ]
-    },
-    {
-      title: '🔗 السوشيال ميديا',
-      fields: [
-        ['social_facebook', 'فيسبوك'],
-        ['social_twitter', 'تويتر / X'],
-        ['social_instagram', 'إنستجرام'],
-        ['social_youtube', 'يوتيوب'],
-        ['social_whatsapp', 'واتساب'],
-      ]
-    },
-    {
-      title: '📄 الفوتر',
-      fields: [
-        ['footer_text', 'نص الحقوق'],
-      ]
-    },
-  ];
+<!-- شاشة تسجيل الدخول -->
+<div id="login" class="login-wrap">
+  <div class="login-card">
+    <h1>🔒 تسجيل دخول الأدمن</h1>
+    <label>الإيميل</label>
+    <input id="em" type="email" autocomplete="username" placeholder="admin@example.com">
+    <label>كلمة المرور</label>
+    <input id="pw" type="password" autocomplete="current-password" placeholder="••••••••">
+    <button id="go" type="button">دخول</button>
+    <div id="loginErr" class="err"></div>
+  </div>
+</div>
 
-  $('panel').innerHTML = `
-    <div class="card">
-      <h2>⚙️ إعدادات الموقع</h2>
-      <p class="mu" style="margin-bottom:16px;color:#45474c;font-size:13px">
-        كل حاجة تكتبها هنا هتظهر في الموقع مباشرة. لو خليت حقل فاضي، الموقع هيستخدم النص الافتراضي.
-      </p>
-      ${groups.map(g => `
-        <div style="margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid #e0e3e5">
-          <h3 style="font-size:15px;margin:0 0 12px;color:#0058be">${g.title}</h3>
-          ${g.fields.map(([k, l]) => `
-            <label>${l}</label>
-            <input id="set_${k}" value="${esc(get(k))}">
-          `).join('')}
-        </div>
-      `).join('')}
-      <div class="row" style="position:sticky;bottom:0;background:#fff;padding:12px;margin:0 -18px -18px;border-top:1px solid #e0e3e5">
-        <button id="set_save" style="width:100%">💾 حفظ كل الإعدادات</button>
+<!-- التطبيق -->
+<div id="app" class="app hidden">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-logo">AN</div>
+      <div>
+        <div class="brand-name">أكاديميا نكست</div>
+        <div class="brand-sub">لوحة التحكم</div>
       </div>
     </div>
-  `;
+    <nav id="nav">
+      <button data-tab="news" class="active">📰 الأخبار</button>
+      <button data-tab="gallery">🖼️ معرض الصور</button>
+      <button data-tab="announcements">📢 الإعلانات</button>
+      <button data-tab="universities">🏛️ الجامعات</button>
+      <button data-tab="majors">🎓 التخصصات</button>
+      <button data-tab="settings">⚙️ الإعدادات</button>
+    </nav>
+    <button id="logout" class="logout">🚪 تسجيل الخروج</button>
+  </aside>
 
-  $('set_save').onclick = async () => {
-    $('set_save').disabled = true;
-    $('set_save').textContent = '⏳ جاري الحفظ...';
-    const allFields = groups.flatMap(g => g.fields);
-    let failed = 0;
-    for (const [k] of allFields) {
-      const v = $('set_' + k).value;
-      const { error } = await sb.from('settings').upsert({ key: k, value: v, updated_at: new Date().toISOString() });
-      if (error) { console.error('fail ' + k, error); failed++; }
-    }
-    $('set_save').disabled = false;
-    $('set_save').textContent = '💾 حفظ كل الإعدادات';
-    if (failed) flash(`فشل حفظ ${failed} حقل`, false);
-    else { await loadAll(); flash('تم حفظ الإعدادات ✅'); }
-  };
-}
+  <main class="content">
+    <div class="content-header">
+      <h1 id="pageTitle">الأخبار</h1>
+      <a href="site.html" target="_blank" class="view-site">👁️ عرض الموقع</a>
+    </div>
+    <div id="panel"></div>
+  </main>
+</div>
+
+<script type="module" src="admin.js"></script>
+</body>
+</html>
