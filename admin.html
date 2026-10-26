@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>لوحة التحكم — أكاديميا نكست</title>
+<link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+<!-- شاشة الدخول -->
+<div id="login" class="login-wrap">
+  <div class="login-card">
+    <h1>🔒 تسجيل دخول الأدمن</h1>
+    <label>الإيميل</label>
+    <input id="em" type="email" autocomplete="username">
+    <label>كلمة المرور</label>
+    <input id="pw" type="password" autocomplete="current-password">
+    <button id="go">دخول</button>
+    <div id="loginErr" class="err"></div>
+  </div>
+</div>
+
+<!-- التطبيق -->
+<div id="app" class="app hidden">
+  <aside class="sidebar">
+    <h2>أكاديميا نكست</h2>
+    <nav>
+      <button data-tab="news" class="active">📰 الأخبار</button>
+      <button data-tab="gallery">🖼️ معرض الصور</button>
+      <button data-tab="announcements">📢 الإعلانات</button>
+      <button data-tab="universities">🏛️ الجامعات</button>
+      <button data-tab="majors">🎓 التخصصات</button>
+      <button data-tab="settings">⚙️ الإعدادات</button>
+    </nav>
+    <button id="logout" class="logout">تسجيل الخروج</button>
+  </aside>
+
+  <main class="content">
+    <h1 id="pageTitle">الأخبار</h1>
+    <div id="panel"></div>
+  </main>
+</div>
+
+<script type="module" src="admin.js"></script>
+</body>
+</html>
