@@ -89,7 +89,7 @@ async function enterApp() {
 async function loadAll() {
   const results = await Promise.all([
     sb.from('news').select('*').order('created_at', { ascending: false }),
-    sb.from('gallery').select('*').order('created_at', { ascending: false }),
+    sb.from('gallery').select('*').order('image_order', { ascending: true }).order('created_at', { ascending: false }),
     sb.from('announcements').select('*').order('created_at', { ascending: false }),
     sb.from('universities').select('*').order('sort_order'),
     sb.from('majors').select('*').order('sort_order'),
@@ -141,16 +141,30 @@ async function uploadImage(file) {
     upsert: false
   });
   if (error) {
-    flash('فشل رفع الصورة: ' + error.message, false);
     console.error('upload error:', error);
+    flash('فشل رفع الصورة: ' + error.message, false);
     return null;
   }
   const { data } = sb.storage.from('media').getPublicUrl(path);
   return data.publicUrl;
 }
 
+function previewImage(event, previewId) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = $(previewId);
+    if (img) {
+      img.src = e.target.result;
+      img.style.display = 'block';
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
 /* ============================================
-   RENDER ROUTER
+   ROUTER
    ============================================ */
 function renderTab() {
   switch(currentTab) {
@@ -173,7 +187,7 @@ function renderNews() {
       <label>العنوان *</label>
       <input id="n_title" placeholder="عنوان الخبر">
       <label>الوصف المختصر</label>
-      <textarea id="n_summary" placeholder="سطر أو سطرين للعرض في القائمة"></textarea>
+      <textarea id="n_summary" placeholder="سطر أو سطرين"></textarea>
       <label>المحتوى الكامل (اختياري)</label>
       <textarea id="n_content" placeholder="تفاصيل الخبر..."></textarea>
       <div class="grid2">
@@ -187,9 +201,7 @@ function renderNews() {
         </div>
       </div>
       <img id="n_preview" class="preview">
-      <div class="row">
-        <button id="n_save">💾 حفظ الخبر</button>
-      </div>
+      <div class="row"><button id="n_save">💾 حفظ الخبر</button></div>
     </div>
 
     <div class="card">
@@ -254,17 +266,40 @@ function renderNews() {
 }
 
 /* ============================================
-   GALLERY
+   GALLERY (يدعم صورة واحدة أو ألبوم)
    ============================================ */
 function renderGallery() {
+  // تجميع الصور في ألبومات
+  const albums = {};
+  DATA.gallery.forEach(g => {
+    const key = g.album_id || ('solo_' + g.id);
+    if (!albums[key]) albums[key] = [];
+    albums[key].push(g);
+  });
+
   $('panel').innerHTML = `
     <div class="card">
-      <h2>➕ إضافة صورة جديدة</h2>
+      <h2>➕ إضافة صورة أو ألبوم جديد</h2>
+
+      <label>نوع الإضافة</label>
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;margin:0;padding:10px 16px;border:2px solid var(--bd);border-radius:8px;flex:1">
+          <input type="radio" name="g_mode" value="single" checked style="width:auto;margin:0">
+          <span>🖼️ صورة واحدة</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;margin:0;padding:10px 16px;border:2px solid var(--bd);border-radius:8px;flex:1">
+          <input type="radio" name="g_mode" value="album" style="width:auto;margin:0">
+          <span>📚 ألبوم (كذا صورة)</span>
+        </label>
+      </div>
+
       <label>العنوان *</label>
-      <input id="g_title" placeholder="عنوان الصورة">
+      <input id="g_title" placeholder="عنوان الصورة أو الألبوم">
+
       <label>الوصف</label>
       <textarea id="g_desc" placeholder="وصف مختصر"></textarea>
-      <div class="grid3">
+
+      <div class="grid2">
         <div>
           <label>التصنيف</label>
           <input id="g_category" value="عام">
@@ -273,75 +308,171 @@ function renderGallery() {
           <label>السنة</label>
           <input id="g_year" type="number" value="${new Date().getFullYear()}">
         </div>
-        <div>
-          <label>الصورة *</label>
-          <input type="file" id="g_image" accept="image/*">
-        </div>
       </div>
-      <img id="g_preview" class="preview">
-      <div class="row">
-        <button id="g_save">💾 حفظ الصورة</button>
-      </div>
+
+      <label id="g_file_label">الصورة *</label>
+      <input type="file" id="g_image" accept="image/*">
+      <input type="file" id="g_images" accept="image/*" multiple style="display:none">
+
+      <div id="g_previews" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-top:12px"></div>
+
+      <div class="row"><button id="g_save">💾 حفظ</button></div>
     </div>
 
     <div class="card">
-      <h2>🖼️ الصور (${DATA.gallery.length})</h2>
-      ${DATA.gallery.length === 0 ? '<div class="empty">لا توجد صور بعد</div>' :
-        DATA.gallery.map(g => `
-          <div class="item">
-            <img src="${esc(g.image_url)}" class="thumb" onerror="this.style.background='#eee'">
-            <div class="item-info">
-              <b>${esc(g.title)}</b>
-              <span>${esc(g.description || '—')}</span>
-              <span class="pill">${esc(g.category || 'عام')} • ${g.year || ''}</span>
+      <h2>🖼️ المحتوى المنشور (${Object.keys(albums).length} ألبوم / صورة)</h2>
+      ${Object.keys(albums).length === 0 ? '<div class="empty">لا توجد صور بعد</div>' :
+        Object.entries(albums).map(([key, imgs]) => {
+          const first = imgs[0];
+          const isAlbum = imgs.length > 1;
+          return `
+            <div class="item">
+              <div style="position:relative;flex-shrink:0">
+                <img src="${esc(first.image_url)}" class="thumb" onerror="this.style.background='#eee'">
+                ${isAlbum ? `<span style="position:absolute;bottom:-4px;left:-4px;background:#0058be;color:#fff;font-size:10px;padding:2px 6px;border-radius:99px;font-weight:700">${imgs.length}</span>` : ''}
+              </div>
+              <div class="item-info">
+                <b>${esc(first.title)} ${isAlbum ? '📚' : ''}</b>
+                <span>${esc(first.description || '—')}</span>
+                <span class="pill">${esc(first.category || 'عام')} • ${first.year || ''}${isAlbum ? ' • ' + imgs.length + ' صورة' : ''}</span>
+              </div>
+              <button class="d" data-del-album="${esc(key)}">حذف</button>
             </div>
-            <button class="d" data-del-gal="${esc(g.id)}">حذف</button>
-          </div>
-        `).join('')}
+          `;
+        }).join('')}
     </div>
   `;
 
-  $('g_image').onchange = e => previewImage(e, 'g_preview');
+  // تبديل بين "صورة" و "ألبوم"
+  const radios = document.querySelectorAll('input[name="g_mode"]');
+  radios.forEach(r => {
+    r.onchange = () => {
+      const isAlbum = document.querySelector('input[name="g_mode"]:checked').value === 'album';
+      $('g_image').style.display = isAlbum ? 'none' : 'block';
+      $('g_images').style.display = isAlbum ? 'block' : 'none';
+      $('g_file_label').textContent = isAlbum ? 'الصور (اختر كذا صورة) *' : 'الصورة *';
+      $('g_previews').innerHTML = '';
+      $('g_image').value = '';
+      $('g_images').value = '';
+    };
+  });
 
+  // معاينة الصور
+  const handlePreview = (input) => {
+    input.onchange = e => {
+      const files = Array.from(e.target.files);
+      const wrap = $('g_previews');
+      wrap.innerHTML = '';
+      files.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = ev => {
+          const div = document.createElement('div');
+          div.style.cssText = 'position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;border:1px solid #e0e3e5';
+          div.innerHTML = `<img src="${ev.target.result}" style="width:100%;height:100%;object-fit:cover">`;
+          wrap.appendChild(div);
+        };
+        reader.readAsDataURL(file);
+      });
+    };
+  };
+  handlePreview($('g_image'));
+  handlePreview($('g_images'));
+
+  // الحفظ
   $('g_save').onclick = async () => {
     const title = $('g_title').value.trim();
-    const file = $('g_image').files[0];
+    const mode = document.querySelector('input[name="g_mode"]:checked').value;
     if (!title) return flash('العنوان مطلوب', false);
-    if (!file) return flash('الصورة مطلوبة', false);
 
     $('g_save').disabled = true;
     $('g_save').textContent = '⏳ جاري الرفع...';
 
-    const url = await uploadImage(file);
-    if (!url) {
+    const desc = $('g_desc').value.trim();
+    const category = $('g_category').value.trim() || 'عام';
+    const year = parseInt($('g_year').value) || new Date().getFullYear();
+
+    if (mode === 'single') {
+      const file = $('g_image').files[0];
+      if (!file) {
+        $('g_save').disabled = false;
+        $('g_save').textContent = '💾 حفظ';
+        return flash('الصورة مطلوبة', false);
+      }
+
+      const url = await uploadImage(file);
+      if (!url) {
+        $('g_save').disabled = false;
+        $('g_save').textContent = '💾 حفظ';
+        return;
+      }
+
+      const { error } = await sb.from('gallery').insert({
+        id: newId(),
+        title, description: desc, category, year,
+        image_url: url,
+        album_id: null,
+        image_order: 0,
+      });
+
       $('g_save').disabled = false;
-      $('g_save').textContent = '💾 حفظ الصورة';
-      return;
+      $('g_save').textContent = '💾 حفظ';
+
+      if (error) return flash('فشل: ' + error.message, false);
+
+    } else {
+      const files = Array.from($('g_images').files);
+      if (files.length === 0) {
+        $('g_save').disabled = false;
+        $('g_save').textContent = '💾 حفظ';
+        return flash('اختر صورة واحدة على الأقل', false);
+      }
+
+      const albumId = newId();
+      let failed = 0;
+
+      for (let i = 0; i < files.length; i++) {
+        const url = await uploadImage(files[i]);
+        if (!url) { failed++; continue; }
+
+        const { error } = await sb.from('gallery').insert({
+          id: newId(),
+          title, description: desc, category, year,
+          image_url: url,
+          album_id: albumId,
+          image_order: i,
+        });
+
+        if (error) {
+          console.error('album insert error:', error);
+          failed++;
+        }
+      }
+
+      $('g_save').disabled = false;
+      $('g_save').textContent = '💾 حفظ';
+
+      if (failed > 0) return flash(`فشل ${failed} من ${files.length} صورة`, false);
     }
-
-    const { error } = await sb.from('gallery').insert({
-      id: newId(),
-      title,
-      description: $('g_desc').value.trim(),
-      category: $('g_category').value.trim() || 'عام',
-      year: parseInt($('g_year').value) || new Date().getFullYear(),
-      image_url: url,
-    });
-
-    $('g_save').disabled = false;
-    $('g_save').textContent = '💾 حفظ الصورة';
-
-    if (error) return flash('فشل: ' + error.message, false);
 
     await loadAll();
     renderGallery();
-    flash('✅ تم حفظ الصورة');
+    flash('✅ تم الحفظ');
   };
 
-  document.querySelectorAll('[data-del-gal]').forEach(b => {
+  // الحذف
+  document.querySelectorAll('[data-del-album]').forEach(b => {
     b.onclick = async () => {
-      if (!confirm('حذف الصورة؟')) return;
-      await sb.from('gallery').delete().eq('id', b.dataset.delGal);
+      const key = b.dataset.delAlbum;
+      const isSolo = key.startsWith('solo_');
+      const label = isSolo ? 'الصورة' : 'الألبوم كامل (كل صوره)';
+      if (!confirm(`حذف ${label}؟`)) return;
+
+      if (isSolo) {
+        const id = key.replace('solo_', '');
+        await sb.from('gallery').delete().eq('id', id);
+      } else {
+        await sb.from('gallery').delete().eq('album_id', key);
+      }
       await loadAll();
       renderGallery();
       flash('🗑️ تم الحذف');
@@ -357,12 +488,10 @@ function renderAnnouncements() {
     <div class="card">
       <h2>➕ إضافة إعلان / تنبيه</h2>
       <label>النص *</label>
-      <textarea id="a_text" placeholder="نص الإعلان اللي هيظهر في الشريط العلوي"></textarea>
+      <textarea id="a_text" placeholder="نص الإعلان"></textarea>
       <label>رابط (اختياري)</label>
       <input id="a_link" placeholder="#contact">
-      <div class="row">
-        <button id="a_save">💾 حفظ الإعلان</button>
-      </div>
+      <div class="row"><button id="a_save">💾 حفظ الإعلان</button></div>
     </div>
 
     <div class="card">
@@ -387,14 +516,12 @@ function renderAnnouncements() {
     if (!text) return flash('النص مطلوب', false);
 
     $('a_save').disabled = true;
-
     const { error } = await sb.from('announcements').insert({
       id: newId(),
       text,
       link: $('a_link').value.trim() || null,
       active: true,
     });
-
     $('a_save').disabled = false;
 
     if (error) return flash('فشل: ' + error.message, false);
@@ -433,43 +560,23 @@ function renderUniversities() {
     <div class="card">
       <h2>➕ إضافة جامعة / شريك</h2>
       <div class="grid2">
-        <div>
-          <label>الاسم *</label>
-          <input id="u_name" placeholder="اسم الجامعة">
-        </div>
-        <div>
-          <label>الموقع</label>
-          <input id="u_loc" placeholder="القاهرة، مصر">
-        </div>
+        <div><label>الاسم *</label><input id="u_name" placeholder="اسم الجامعة"></div>
+        <div><label>الموقع</label><input id="u_loc" placeholder="القاهرة، مصر"></div>
       </div>
       <label>الوصف</label>
       <textarea id="u_desc" placeholder="نبذة عن الجامعة"></textarea>
       <div class="grid2">
-        <div>
-          <label>شارة (اختياري)</label>
-          <input id="u_badge" placeholder="معتمدة دولياً">
-        </div>
-        <div>
-          <label>السعر يبدأ من</label>
-          <input id="u_price" placeholder="$3,200 / سنوي">
-        </div>
+        <div><label>شارة (اختياري)</label><input id="u_badge" placeholder="معتمدة دولياً"></div>
+        <div><label>السعر يبدأ من</label><input id="u_price" placeholder="$3,200 / سنوي"></div>
       </div>
       <div class="grid2">
-        <div>
-          <label>التصنيف (بلد)</label>
-          <input id="u_cat" placeholder="مصر">
-        </div>
-        <div>
-          <label>التخصصات (مفصولة بفاصلة)</label>
-          <input id="u_majors" placeholder="الهندسة, الطب, إدارة الأعمال">
-        </div>
+        <div><label>التصنيف (بلد)</label><input id="u_cat" placeholder="مصر"></div>
+        <div><label>التخصصات (مفصولة بفاصلة)</label><input id="u_majors" placeholder="الهندسة, الطب"></div>
       </div>
       <label>صورة الجامعة</label>
       <input type="file" id="u_image" accept="image/*">
       <img id="u_preview" class="preview">
-      <div class="row">
-        <button id="u_save">💾 حفظ</button>
-      </div>
+      <div class="row"><button id="u_save">💾 حفظ</button></div>
     </div>
 
     <div class="card">
@@ -545,9 +652,7 @@ function renderMajors() {
       <h2>➕ إضافة تخصص</h2>
       <label>اسم التخصص</label>
       <input id="m_name" placeholder="مثال: الطب البشري">
-      <div class="row">
-        <button id="m_save">➕ إضافة</button>
-      </div>
+      <div class="row"><button id="m_save">➕ إضافة</button></div>
     </div>
 
     <div class="card">
@@ -567,9 +672,7 @@ function renderMajors() {
     if (!name) return flash('الاسم مطلوب', false);
 
     const { error } = await sb.from('majors').insert({
-      id: newId(),
-      name,
-      sort_order: DATA.majors.length
+      id: newId(), name, sort_order: DATA.majors.length
     });
 
     if (error) return flash('فشل: ' + error.message, false);
@@ -589,7 +692,7 @@ function renderMajors() {
 }
 
 /* ============================================
-   SETTINGS (كل النصوص)
+   SETTINGS
    ============================================ */
 function renderSettings() {
   const get = k => (DATA.settings.find(s => s.key === k) || {}).value || '';
@@ -672,9 +775,7 @@ function renderSettings() {
     },
     {
       title: '📄 الفوتر',
-      fields: [
-        ['footer_text', 'نص الحقوق'],
-      ]
+      fields: [['footer_text', 'نص الحقوق']]
     },
   ];
 
@@ -707,40 +808,15 @@ function renderSettings() {
     for (const [k] of allFields) {
       const v = $('set_' + k).value;
       const { error } = await sb.from('settings').upsert({
-        key: k,
-        value: v,
-        updated_at: new Date().toISOString()
+        key: k, value: v, updated_at: new Date().toISOString()
       });
-      if (error) {
-        console.error('fail ' + k, error);
-        failed++;
-      }
+      if (error) { console.error('fail ' + k, error); failed++; }
     }
     $('set_save').disabled = false;
     $('set_save').textContent = '💾 حفظ كل الإعدادات';
     if (failed) flash(`فشل حفظ ${failed} حقل`, false);
-    else {
-      await loadAll();
-      flash('✅ تم حفظ الإعدادات');
-    }
+    else { await loadAll(); flash('✅ تم حفظ الإعدادات'); }
   };
-}
-
-/* ============================================
-   HELPERS
-   ============================================ */
-function previewImage(event, previewId) {
-  const file = event.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    const img = $(previewId);
-    if (img) {
-      img.src = e.target.result;
-      img.style.display = 'block';
-    }
-  };
-  reader.readAsDataURL(file);
 }
 
 /* ============================================

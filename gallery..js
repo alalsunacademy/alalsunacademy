@@ -13,41 +13,61 @@ let currentFilter = 'all';
 let currentYear = 'all';
 let currentSearch = '';
 let currentIndex = 0;
-let debugMode = true; // ← غيّرها لـ false بعد ما نتأكد إن كل حاجة شغالة
+let currentAlbumImages = [];
+let currentAlbumIdx = 0;
 
 async function loadGallery() {
-  console.log('[gallery] starting load...');
+  console.log('[gallery] loading...');
 
-  const { data, error } = await sb.from('gallery').select('*').order('created_at', { ascending: false });
+  const { data, error } = await sb
+    .from('gallery')
+    .select('*')
+    .order('image_order', { ascending: true })
+    .order('created_at', { ascending: false });
 
   if (error) {
-    console.error('[gallery] Supabase error:', error);
+    console.error('[gallery] error:', error);
     showError('خطأ في تحميل الصور: ' + error.message);
     return;
   }
 
-  console.log('[gallery] loaded rows:', data?.length || 0);
-  if (data && data[0]) console.log('[gallery] sample row:', data[0]);
+  console.log('[gallery] rows:', data?.length || 0);
 
-  ALL = data || [];
+  // تجميع في ألبومات
+  const albumMap = {};
+  (data || []).forEach(g => {
+    const key = g.album_id || ('solo_' + g.id);
+    if (!albumMap[key]) albumMap[key] = [];
+    albumMap[key].push(g);
+  });
+
+  ALL = Object.entries(albumMap).map(([key, imgs]) => ({
+    key,
+    title: imgs[0].title,
+    description: imgs[0].description,
+    category: imgs[0].category || 'عام',
+    year: imgs[0].year,
+    created_at: imgs[0].created_at,
+    cover: imgs[0].image_url,
+    images: imgs.map(x => x.image_url),
+    count: imgs.length,
+    is_album: imgs.length > 1,
+  }));
+
+  console.log('[gallery] albums:', ALL.length);
 
   if (ALL.length === 0) {
     showEmpty('لا توجد صور', 'لم يقم الأدمن بإضافة أي صور بعد');
     return;
   }
 
-  $('statPhotos').textContent = ALL.length + '+';
+  $('statPhotos').textContent = ALL.reduce((s, a) => s + a.count, 0) + '+';
   const categories = new Set(ALL.map(g => g.category || 'عام'));
   $('statCategories').textContent = categories.size;
 
-  try {
-    buildCategoryFilter(categories);
-    buildYearFilter();
-    applyFilters();
-  } catch (e) {
-    console.error('[gallery] render error:', e);
-    showError('خطأ في عرض الصور: ' + e.message);
-  }
+  buildCategoryFilter(categories);
+  buildYearFilter();
+  applyFilters();
 }
 
 function showEmpty(title, desc) {
@@ -68,7 +88,7 @@ function showError(msg) {
   empty.innerHTML = `
     <div class="text-6xl mb-4">⚠️</div>
     <p class="font-headline-sm text-red-600">${esc(msg)}</p>
-    <p class="font-body-md mt-1 text-on-surface-variant">افتح Console (F12) لمعرفة التفاصيل</p>
+    <p class="font-body-md mt-1 text-on-surface-variant">افتح Console (F12) للتفاصيل</p>
   `;
 }
 
@@ -147,73 +167,32 @@ function renderGrid() {
 
   if (empty) empty.classList.add('hidden');
 
-  // ✅ Carousel أفقي بدل grid رأسي
-  grid.className = 'carousel-track';
+  grid.className = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6';
   grid.innerHTML = filtered.map((g, i) => `
-    <article data-idx="${i}" class="carousel-card">
-      <div class="carousel-img-wrap">
-        ${g.image_url
-          ? `<img src="${esc(g.image_url)}" class="carousel-img" alt="${esc(g.title)}" loading="lazy" onerror="this.parentNode.innerHTML='<div class=\\'carousel-fallback\\'>🖼</div>'">`
-          : `<div class="carousel-fallback">🖼</div>`}
-        <div class="carousel-overlay"></div>
-        <div class="carousel-badge-top-right">
-          <span>📷 صورة</span>
-        </div>
-        <div class="carousel-badge-top-left">${esc(g.category || 'عام')}</div>
-        <div class="carousel-title-wrap">
-          <span class="carousel-year">${g.year || ''}</span>
-          <h3 class="carousel-title">${esc(g.title)}</h3>
-        </div>
+    <article data-idx="${i}" class="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all cursor-pointer group">
+      <div class="relative aspect-[4/3] overflow-hidden bg-surface-container-low">
+        ${g.cover
+          ? `<img src="${esc(g.cover)}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="${esc(g.title)}" loading="lazy">`
+          : `<div class="w-full h-full flex items-center justify-center text-5xl">🖼</div>`}
+        ${g.is_album ? `
+          <div class="absolute top-3 left-3 bg-primary/85 backdrop-blur-md text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
+            <span class="material-symbols-outlined text-[14px]">collections</span>
+            <span>${g.count} صور</span>
+          </div>` : ''}
+        <div class="absolute top-3 right-3 bg-white/90 backdrop-blur-sm text-primary text-xs px-2 py-1 rounded-full">${esc(g.category)}</div>
       </div>
-      <div class="carousel-body">
-        <p class="carousel-desc">${esc(g.description || '')}</p>
-        <div class="carousel-footer">
-          <span class="carousel-date">📅 ${new Date(g.created_at).toLocaleDateString('ar-EG')}</span>
-          <span class="carousel-cta">تصفح ←</span>
+      <div class="p-4">
+        <h3 class="font-bold text-primary mb-1 line-clamp-1">${esc(g.title)}</h3>
+        <p class="text-sm text-on-surface-variant line-clamp-2">${esc(g.description || '')}</p>
+        <div class="mt-3 flex items-center justify-between text-xs text-on-surface-variant">
+          <span>${g.year || ''}</span>
+          <span class="text-secondary font-bold">${g.is_album ? 'عرض الألبوم ←' : 'عرض ←'}</span>
         </div>
       </div>
     </article>
   `).join('');
 
-  // ✅ إضافة أزرار التمرير
-  const section = grid.parentNode;
-  const oldNav = section.querySelector('.carousel-nav');
-  if (oldNav) oldNav.remove();
-
-  const nav = document.createElement('div');
-  nav.className = 'carousel-nav';
-  nav.innerHTML = `
-    <button class="carousel-btn" id="carouselPrev" aria-label="السابق">‹</button>
-    <button class="carousel-btn" id="carouselNext" aria-label="التالي">›</button>
-  `;
-  section.appendChild(nav);
-
-  $('carouselPrev').onclick = () => {
-    grid.scrollBy({ left: 350, behavior: 'smooth' });
-  };
-  $('carouselNext').onclick = () => {
-    grid.scrollBy({ left: -350, behavior: 'smooth' });
-  };
-
-  // سحب بالماوس
-  let isDown = false, startX = 0, scrollLeft = 0;
-  grid.addEventListener('mousedown', e => {
-    isDown = true;
-    grid.classList.add('dragging');
-    startX = e.pageX - grid.offsetLeft;
-    scrollLeft = grid.scrollLeft;
-  });
-  grid.addEventListener('mouseleave', () => { isDown = false; grid.classList.remove('dragging'); });
-  grid.addEventListener('mouseup', () => { isDown = false; grid.classList.remove('dragging'); });
-  grid.addEventListener('mousemove', e => {
-    if (!isDown) return;
-    e.preventDefault();
-    const x = e.pageX - grid.offsetLeft;
-    grid.scrollLeft = scrollLeft - (x - startX);
-  });
-
-  // فتح الـ lightbox
-  grid.querySelectorAll('.carousel-card').forEach(el => {
+  grid.querySelectorAll('article[data-idx]').forEach(el => {
     el.onclick = () => openLightbox(parseInt(el.dataset.idx));
   });
 }
@@ -225,18 +204,25 @@ function openLightbox(idx) {
   const g = filtered[currentIndex];
   if (!g) return;
 
-  $('lbImage').src = g.image_url || '';
-  $('lbImage').alt = g.title || '';
+  currentAlbumImages = g.images || [g.cover];
+  currentAlbumIdx = 0;
+  showLightboxImage();
+
   $('lbTitle').textContent = g.title || '';
   $('lbDesc').textContent = g.description || '';
   $('lbCategory').textContent = g.category || 'عام';
   $('lbYear').textContent = g.year || '';
-  $('lbCounter').textContent = (currentIndex + 1) + ' / ' + filtered.length;
-  $('lbDownload').href = g.image_url || '#';
 
   $('lightbox').classList.remove('hidden');
   $('lightbox').classList.add('flex');
   document.body.style.overflow = 'hidden';
+}
+
+function showLightboxImage() {
+  const url = currentAlbumImages[currentAlbumIdx];
+  $('lbImage').src = url || '';
+  $('lbCounter').textContent = (currentAlbumIdx + 1) + ' / ' + currentAlbumImages.length;
+  $('lbDownload').href = url || '#';
 }
 
 function closeLightbox() {
@@ -247,14 +233,26 @@ function closeLightbox() {
 
 $('lbClose').onclick = closeLightbox;
 $('lightbox').onclick = e => { if (e.target === $('lightbox')) closeLightbox(); };
-$('lbPrev').onclick = e => { e.stopPropagation(); openLightbox(currentIndex + 1); };
-$('lbNext').onclick = e => { e.stopPropagation(); openLightbox(currentIndex - 1); };
+
+$('lbPrev').onclick = e => {
+  e.stopPropagation();
+  if (currentAlbumImages.length === 0) return;
+  currentAlbumIdx = (currentAlbumIdx + 1) % currentAlbumImages.length;
+  showLightboxImage();
+};
+
+$('lbNext').onclick = e => {
+  e.stopPropagation();
+  if (currentAlbumImages.length === 0) return;
+  currentAlbumIdx = (currentAlbumIdx - 1 + currentAlbumImages.length) % currentAlbumImages.length;
+  showLightboxImage();
+};
 
 document.addEventListener('keydown', e => {
   if ($('lightbox').classList.contains('hidden')) return;
   if (e.key === 'Escape') closeLightbox();
-  if (e.key === 'ArrowLeft') openLightbox(currentIndex - 1);
-  if (e.key === 'ArrowRight') openLightbox(currentIndex + 1);
+  if (e.key === 'ArrowLeft') { currentAlbumIdx = (currentAlbumIdx - 1 + currentAlbumImages.length) % currentAlbumImages.length; showLightboxImage(); }
+  if (e.key === 'ArrowRight') { currentAlbumIdx = (currentAlbumIdx + 1) % currentAlbumImages.length; showLightboxImage(); }
 });
 
 let searchTimer;
