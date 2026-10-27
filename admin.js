@@ -9,7 +9,7 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => (
 const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
 
 let currentTab = 'news';
-let DATA = { news: [], gallery: [], announcements: [], universities: [], majors: [], settings: [] };
+let DATA = { news: [], gallery: [], announcements: [], programs: [], majors: [], settings: [] };
 
 async function init() {
   try {
@@ -35,7 +35,7 @@ async function doLogin() {
   const pw = $('pw').value;
   if (!em || !pw) { $('loginErr').textContent = 'اكتب الإيميل والباسورد'; return; }
   $('go').disabled = true;
-  $('go').textContent = '⏳ جاري الدخول...';
+  $('go').textContent = '⏳...';
   $('loginErr').textContent = '';
   const { error } = await sb.auth.signInWithPassword({ email: em, password: pw });
   $('go').disabled = false;
@@ -47,17 +47,14 @@ async function doLogin() {
 async function enterApp() {
   $('login').classList.add('hidden');
   $('app').classList.remove('hidden');
-
   $('logout').onclick = async () => {
     await sb.auth.signOut();
-    DATA = { news: [], gallery: [], announcements: [], universities: [], majors: [], settings: [] };
+    DATA = { news: [], gallery: [], announcements: [], programs: [], majors: [], settings: [] };
     showLogin();
   };
-
   document.querySelectorAll('#nav button[data-tab]').forEach(b => {
     b.onclick = () => switchTab(b.dataset.tab);
   });
-
   await loadAll();
   await loadBrandInSidebar();
   switchTab('news');
@@ -69,10 +66,8 @@ async function loadBrandInSidebar() {
     const S = {};
     (data || []).forEach(x => { if (x.value) S[x.key] = x.value; });
     if (S.brand_name) {
-      const bn = $('adminBrandName');
-      if (bn) bn.textContent = S.brand_name;
-      const fb = $('adminLogoFallback');
-      if (fb) fb.textContent = S.brand_name.split(' ')[0];
+      const bn = $('adminBrandName'); if (bn) bn.textContent = S.brand_name;
+      const fb = $('adminLogoFallback'); if (fb) fb.textContent = S.brand_name.split(' ')[0];
     }
     if (S.brand_logo_url) {
       const img = $('adminLogoImg');
@@ -92,11 +87,11 @@ async function loadAll() {
     sb.from('news').select('*').order('created_at', { ascending: false }),
     sb.from('gallery').select('*').order('image_order', { ascending: true }).order('created_at', { ascending: false }),
     sb.from('announcements').select('*').order('created_at', { ascending: false }),
-    sb.from('universities').select('*').order('sort_order'),
+    sb.from('programs').select('*').order('sort_order'),
     sb.from('majors').select('*').order('sort_order'),
     sb.from('settings').select('*'),
   ]);
-  const keys = ['news', 'gallery', 'announcements', 'universities', 'majors', 'settings'];
+  const keys = ['news', 'gallery', 'announcements', 'programs', 'majors', 'settings'];
   results.forEach((r, i) => {
     if (r.error) console.error('load ' + keys[i] + ':', r.error);
     DATA[keys[i]] = r.data || [];
@@ -111,8 +106,8 @@ function switchTab(tab) {
   const titles = {
     news: '📰 إدارة الأخبار',
     gallery: '🖼️ معرض الصور',
-    announcements: '📢 الإعلانات والتنبيهات',
-    universities: '🏛️ الجامعات والشركاء',
+    programs: '📚 البرامج الدراسية',
+    announcements: '📢 الإعلانات',
     majors: '🎓 التخصصات',
     settings: '⚙️ إعدادات الموقع'
   };
@@ -133,7 +128,7 @@ async function uploadImage(file) {
   const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
   const path = `${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;
   const { error } = await sb.storage.from('media').upload(path, file, { cacheControl: '3600', upsert: false });
-  if (error) { console.error('upload error:', error); flash('فشل رفع الصورة: ' + error.message, false); return null; }
+  if (error) { flash('فشل رفع الصورة: ' + error.message, false); return null; }
   const { data } = sb.storage.from('media').getPublicUrl(path);
   return data.publicUrl;
 }
@@ -153,8 +148,8 @@ function renderTab() {
   switch(currentTab) {
     case 'news': renderNews(); break;
     case 'gallery': renderGallery(); break;
+    case 'programs': renderPrograms(); break;
     case 'announcements': renderAnnouncements(); break;
-    case 'universities': renderUniversities(); break;
     case 'majors': renderMajors(); break;
     case 'settings': renderSettings(); break;
   }
@@ -163,31 +158,27 @@ function renderTab() {
 function renderNews() {
   $('panel').innerHTML = `
     <div class="card">
-      <h2>➕ إضافة خبر جديد</h2>
+      <h2>➕ إضافة خبر</h2>
       <label>العنوان *</label>
-      <input id="n_title" placeholder="عنوان الخبر">
+      <input id="n_title">
       <label>الوصف المختصر</label>
-      <textarea id="n_summary" placeholder="سطر أو سطرين"></textarea>
-      <label>المحتوى الكامل (اختياري)</label>
-      <textarea id="n_content" placeholder="تفاصيل الخبر..."></textarea>
+      <textarea id="n_summary"></textarea>
+      <label>المحتوى الكامل</label>
+      <textarea id="n_content"></textarea>
       <div class="grid2">
         <div><label>التصنيف</label><input id="n_category" value="عام"></div>
-        <div><label>صورة الخبر</label><input type="file" id="n_image" accept="image/*"></div>
+        <div><label>صورة</label><input type="file" id="n_image" accept="image/*"></div>
       </div>
       <img id="n_preview" class="preview">
-      <div class="row"><button id="n_save">💾 حفظ الخبر</button></div>
+      <div class="row"><button id="n_save">💾 حفظ</button></div>
     </div>
     <div class="card">
-      <h2>📰 الأخبار المنشورة (${DATA.news.length})</h2>
-      ${DATA.news.length === 0 ? '<div class="empty">لا توجد أخبار بعد</div>' :
+      <h2>📰 الأخبار (${DATA.news.length})</h2>
+      ${DATA.news.length === 0 ? '<div class="empty">لا توجد أخبار</div>' :
         DATA.news.map(n => `
           <div class="item">
-            ${n.image_url ? `<img src="${esc(n.image_url)}" class="thumb" onerror="this.style.display='none'">` : '<div class="thumb" style="display:flex;align-items:center;justify-content:center;color:#ccc">📰</div>'}
-            <div class="item-info">
-              <b>${esc(n.title)}</b>
-              <span>${esc(n.summary || '—')}</span>
-              <span class="pill">${esc(n.category || 'عام')}</span>
-            </div>
+            ${n.image_url ? `<img src="${esc(n.image_url)}" class="thumb" onerror="this.style.display='none'">` : '<div class="thumb"></div>'}
+            <div class="item-info"><b>${esc(n.title)}</b><span>${esc(n.summary || '—')}</span><span class="pill">${esc(n.category || 'عام')}</span></div>
             <button class="d" data-del-news="${esc(n.id)}">حذف</button>
           </div>
         `).join('')}
@@ -198,7 +189,6 @@ function renderNews() {
     const title = $('n_title').value.trim();
     if (!title) return flash('العنوان مطلوب', false);
     $('n_save').disabled = true;
-    $('n_save').textContent = '⏳ جاري الحفظ...';
     const img = await uploadImage($('n_image').files[0]);
     const { error } = await sb.from('news').insert({
       id: newId(), title,
@@ -208,15 +198,14 @@ function renderNews() {
       image_url: img, published: true,
     });
     $('n_save').disabled = false;
-    $('n_save').textContent = '💾 حفظ الخبر';
     if (error) return flash('فشل: ' + error.message, false);
-    await loadAll(); renderNews(); flash('✅ تم حفظ الخبر');
+    await loadAll(); renderNews(); flash('✅');
   };
   document.querySelectorAll('[data-del-news]').forEach(b => {
     b.onclick = async () => {
-      if (!confirm('حذف الخبر؟')) return;
+      if (!confirm('حذف؟')) return;
       await sb.from('news').delete().eq('id', b.dataset.delNews);
-      await loadAll(); renderNews(); flash('🗑️ تم الحذف');
+      await loadAll(); renderNews(); flash('🗑️');
     };
   });
 }
@@ -231,20 +220,20 @@ function renderGallery() {
 
   $('panel').innerHTML = `
     <div class="card">
-      <h2>➕ إضافة صورة أو ألبوم جديد</h2>
+      <h2>➕ إضافة صورة أو ألبوم</h2>
       <label>نوع الإضافة</label>
       <div style="display:flex;gap:8px;margin-bottom:12px">
         <label style="display:flex;align-items:center;gap:6px;cursor:pointer;margin:0;padding:10px 16px;border:2px solid var(--bd);border-radius:8px;flex:1">
-          <input type="radio" name="g_mode" value="single" checked style="width:auto;margin:0"><span>🖼️ صورة واحدة</span>
+          <input type="radio" name="g_mode" value="single" checked style="width:auto;margin:0"><span>🖼️ صورة</span>
         </label>
         <label style="display:flex;align-items:center;gap:6px;cursor:pointer;margin:0;padding:10px 16px;border:2px solid var(--bd);border-radius:8px;flex:1">
           <input type="radio" name="g_mode" value="album" style="width:auto;margin:0"><span>📚 ألبوم</span>
         </label>
       </div>
       <label>العنوان *</label>
-      <input id="g_title" placeholder="عنوان الصورة أو الألبوم">
+      <input id="g_title">
       <label>الوصف</label>
-      <textarea id="g_desc" placeholder="وصف مختصر"></textarea>
+      <textarea id="g_desc"></textarea>
       <div class="grid2">
         <div><label>التصنيف</label><input id="g_category" value="عام"></div>
         <div><label>السنة</label><input id="g_year" type="number" value="${new Date().getFullYear()}"></div>
@@ -256,8 +245,8 @@ function renderGallery() {
       <div class="row"><button id="g_save">💾 حفظ</button></div>
     </div>
     <div class="card">
-      <h2>🖼️ المحتوى المنشور (${Object.keys(albums).length})</h2>
-      ${Object.keys(albums).length === 0 ? '<div class="empty">لا توجد صور بعد</div>' :
+      <h2>🖼️ المحتوى (${Object.keys(albums).length})</h2>
+      ${Object.keys(albums).length === 0 ? '<div class="empty">لا توجد صور</div>' :
         Object.entries(albums).map(([key, imgs]) => {
           const first = imgs[0];
           const isAlbum = imgs.length > 1;
@@ -267,11 +256,7 @@ function renderGallery() {
                 <img src="${esc(first.image_url)}" class="thumb" onerror="this.style.background='#eee'">
                 ${isAlbum ? `<span style="position:absolute;bottom:-4px;left:-4px;background:#0058be;color:#fff;font-size:10px;padding:2px 6px;border-radius:99px;font-weight:700">${imgs.length}</span>` : ''}
               </div>
-              <div class="item-info">
-                <b>${esc(first.title)} ${isAlbum ? '📚' : ''}</b>
-                <span>${esc(first.description || '—')}</span>
-                <span class="pill">${esc(first.category || 'عام')} • ${first.year || ''}${isAlbum ? ' • ' + imgs.length + ' صورة' : ''}</span>
-              </div>
+              <div class="item-info"><b>${esc(first.title)}</b><span>${esc(first.description || '—')}</span><span class="pill">${esc(first.category || 'عام')} • ${first.year || ''}${isAlbum ? ' • ' + imgs.length + ' صورة' : ''}</span></div>
               <button class="d" data-del-album="${esc(key)}">حذف</button>
             </div>
           `;
@@ -284,10 +269,8 @@ function renderGallery() {
       const isAlbum = document.querySelector('input[name="g_mode"]:checked').value === 'album';
       $('g_image').style.display = isAlbum ? 'none' : 'block';
       $('g_images').style.display = isAlbum ? 'block' : 'none';
-      $('g_file_label').textContent = isAlbum ? 'الصور (اختر كذا صورة) *' : 'الصورة *';
+      $('g_file_label').textContent = isAlbum ? 'الصور *' : 'الصورة *';
       $('g_previews').innerHTML = '';
-      $('g_image').value = '';
-      $('g_images').value = '';
     };
   });
 
@@ -316,53 +299,111 @@ function renderGallery() {
     const mode = document.querySelector('input[name="g_mode"]:checked').value;
     if (!title) return flash('العنوان مطلوب', false);
     $('g_save').disabled = true;
-    $('g_save').textContent = '⏳ جاري الرفع...';
     const desc = $('g_desc').value.trim();
     const category = $('g_category').value.trim() || 'عام';
     const year = parseInt($('g_year').value) || new Date().getFullYear();
 
     if (mode === 'single') {
       const file = $('g_image').files[0];
-      if (!file) { $('g_save').disabled = false; $('g_save').textContent = '💾 حفظ'; return flash('الصورة مطلوبة', false); }
+      if (!file) { $('g_save').disabled = false; return flash('الصورة مطلوبة', false); }
       const url = await uploadImage(file);
-      if (!url) { $('g_save').disabled = false; $('g_save').textContent = '💾 حفظ'; return; }
-      const { error } = await sb.from('gallery').insert({
-        id: newId(), title, description: desc, category, year,
-        image_url: url, album_id: null, image_order: 0,
-      });
-      $('g_save').disabled = false;
-      $('g_save').textContent = '💾 حفظ';
-      if (error) return flash('فشل: ' + error.message, false);
+      if (!url) { $('g_save').disabled = false; return; }
+      await sb.from('gallery').insert({ id: newId(), title, description: desc, category, year, image_url: url, album_id: null, image_order: 0 });
     } else {
       const files = Array.from($('g_images').files);
-      if (files.length === 0) { $('g_save').disabled = false; $('g_save').textContent = '💾 حفظ'; return flash('اختر صورة واحدة على الأقل', false); }
+      if (files.length === 0) { $('g_save').disabled = false; return flash('اختر صور', false); }
       const albumId = newId();
-      let failed = 0;
       for (let i = 0; i < files.length; i++) {
         const url = await uploadImage(files[i]);
-        if (!url) { failed++; continue; }
-        const { error } = await sb.from('gallery').insert({
-          id: newId(), title, description: desc, category, year,
-          image_url: url, album_id: albumId, image_order: i,
-        });
-        if (error) { console.error('album insert:', error); failed++; }
+        if (!url) continue;
+        await sb.from('gallery').insert({ id: newId(), title, description: desc, category, year, image_url: url, album_id: albumId, image_order: i });
       }
-      $('g_save').disabled = false;
-      $('g_save').textContent = '💾 حفظ';
-      if (failed > 0) return flash(`فشل ${failed} من ${files.length} صورة`, false);
     }
-    await loadAll(); renderGallery(); flash('✅ تم الحفظ');
+    $('g_save').disabled = false;
+    await loadAll(); renderGallery(); flash('✅');
   };
 
   document.querySelectorAll('[data-del-album]').forEach(b => {
     b.onclick = async () => {
       const key = b.dataset.delAlbum;
       const isSolo = key.startsWith('solo_');
-      const label = isSolo ? 'الصورة' : 'الألبوم كامل';
-      if (!confirm(`حذف ${label}؟`)) return;
+      if (!confirm('حذف؟')) return;
       if (isSolo) await sb.from('gallery').delete().eq('id', key.replace('solo_', ''));
       else await sb.from('gallery').delete().eq('album_id', key);
-      await loadAll(); renderGallery(); flash('🗑️ تم الحذف');
+      await loadAll(); renderGallery(); flash('🗑️');
+    };
+  });
+}
+
+function renderPrograms() {
+  $('panel').innerHTML = `
+    <div class="card">
+      <h2>➕ إضافة برنامج دراسي</h2>
+      <div class="grid2">
+        <div><label>اسم البرنامج *</label><input id="p_name" placeholder="مثال: بكالوريوس هندسة الحاسب"></div>
+        <div><label>الجامعة</label><input id="p_university" placeholder="مثال: جامعة القاهرة"></div>
+      </div>
+      <div class="grid2">
+        <div><label>الموقع</label><input id="p_loc" placeholder="القاهرة، مصر"></div>
+        <div><label>المدة</label><input id="p_duration" placeholder="4 سنوات"></div>
+      </div>
+      <label>الوصف المختصر</label>
+      <textarea id="p_desc" placeholder="نبذة قصيرة تظهر في الكارت"></textarea>
+      <label>التفاصيل الكاملة (تظهر في صفحة التفاصيل)</label>
+      <textarea id="p_details" placeholder="معلومات مفصلة عن البرنامج، شروط القبول، الرسوم، إلخ..."></textarea>
+      <div class="grid2">
+        <div><label>شارة (اختياري)</label><input id="p_badge" placeholder="معتمد"></div>
+        <div><label>السعر</label><input id="p_price" placeholder="من $3,200"></div>
+      </div>
+      <div class="grid2">
+        <div><label>التخصص</label><input id="p_cat" placeholder="هندسة"></div>
+        <div><label>الكلمات المفتاحية (فاصلة)</label><input id="p_majors" placeholder="هندسة, حاسب"></div>
+      </div>
+      <label>صورة</label>
+      <input type="file" id="p_image" accept="image/*">
+      <img id="p_preview" class="preview">
+      <div class="row"><button id="p_save">💾 حفظ</button></div>
+    </div>
+    <div class="card">
+      <h2>📚 البرامج (${DATA.programs.length})</h2>
+      ${DATA.programs.length === 0 ? '<div class="empty">لا توجد برامج</div>' :
+        DATA.programs.map(p => `
+          <div class="item">
+            ${p.image_url ? `<img src="${esc(p.image_url)}" class="thumb" onerror="this.style.display='none'">` : '<div class="thumb"></div>'}
+            <div class="item-info"><b>${esc(p.name)}</b><span>${esc(p.university || '')} — ${esc(p.location || '')}</span><span class="pill">${esc(p.category || '')}</span></div>
+            <button class="d" data-del-prog="${esc(p.id)}">حذف</button>
+          </div>
+        `).join('')}
+    </div>
+  `;
+  $('p_image').onchange = e => previewImage(e, 'p_preview');
+  $('p_save').onclick = async () => {
+    const name = $('p_name').value.trim();
+    if (!name) return flash('الاسم مطلوب', false);
+    $('p_save').disabled = true;
+    const img = await uploadImage($('p_image').files[0]);
+    const majors = $('p_majors').value.split(',').map(x => x.trim()).filter(Boolean);
+    const { error } = await sb.from('programs').insert({
+      id: newId(), name,
+      university: $('p_university').value.trim(),
+      location: $('p_loc').value.trim(),
+      description: $('p_desc').value.trim(),
+      details: $('p_details').value.trim(),
+      badge: $('p_badge').value.trim(),
+      price_from: $('p_price').value.trim(),
+      duration: $('p_duration').value.trim(),
+      category: $('p_cat').value.trim(),
+      majors, image_url: img, sort_order: DATA.programs.length,
+    });
+    $('p_save').disabled = false;
+    if (error) return flash('فشل: ' + error.message, false);
+    await loadAll(); renderPrograms(); flash('✅');
+  };
+  document.querySelectorAll('[data-del-prog]').forEach(b => {
+    b.onclick = async () => {
+      if (!confirm('حذف؟')) return;
+      await sb.from('programs').delete().eq('id', b.dataset.delProg);
+      await loadAll(); renderPrograms(); flash('🗑️');
     };
   });
 }
@@ -372,9 +413,9 @@ function renderAnnouncements() {
     <div class="card">
       <h2>➕ إضافة إعلان</h2>
       <label>النص *</label>
-      <textarea id="a_text" placeholder="نص الإعلان"></textarea>
+      <textarea id="a_text"></textarea>
       <label>رابط (اختياري)</label>
-      <input id="a_link" placeholder="#contact">
+      <input id="a_link">
       <div class="row"><button id="a_save">💾 حفظ</button></div>
     </div>
     <div class="card">
@@ -382,11 +423,7 @@ function renderAnnouncements() {
       ${DATA.announcements.length === 0 ? '<div class="empty">لا توجد إعلانات</div>' :
         DATA.announcements.map(a => `
           <div class="item">
-            <div class="item-info">
-              <b>${esc(a.text)}</b>
-              <span>${esc(a.link || '—')}</span>
-              <span class="pill" style="background:${a.active ? '#d1fae5' : '#fee2e2'};color:${a.active ? '#0a7a3f' : '#ba1a1a'}">${a.active ? 'نشط' : 'موقوف'}</span>
-            </div>
+            <div class="item-info"><b>${esc(a.text)}</b><span>${esc(a.link || '—')}</span><span class="pill" style="background:${a.active ? '#d1fae5' : '#fee2e2'};color:${a.active ? '#0a7a3f' : '#ba1a1a'}">${a.active ? 'نشط' : 'موقوف'}</span></div>
             <button class="s" data-tog-ann="${esc(a.id)}">${a.active ? '⏸️' : '▶️'}</button>
             <button class="d" data-del-ann="${esc(a.id)}">حذف</button>
           </div>
@@ -396,19 +433,15 @@ function renderAnnouncements() {
   $('a_save').onclick = async () => {
     const text = $('a_text').value.trim();
     if (!text) return flash('النص مطلوب', false);
-    $('a_save').disabled = true;
-    const { error } = await sb.from('announcements').insert({
-      id: newId(), text, link: $('a_link').value.trim() || null, active: true,
-    });
-    $('a_save').disabled = false;
+    const { error } = await sb.from('announcements').insert({ id: newId(), text, link: $('a_link').value.trim() || null, active: true });
     if (error) return flash('فشل: ' + error.message, false);
-    await loadAll(); renderAnnouncements(); flash('✅ تم الحفظ');
+    await loadAll(); renderAnnouncements(); flash('✅');
   };
   document.querySelectorAll('[data-del-ann]').forEach(b => {
     b.onclick = async () => {
       if (!confirm('حذف؟')) return;
       await sb.from('announcements').delete().eq('id', b.dataset.delAnn);
-      await loadAll(); renderAnnouncements(); flash('🗑️ تم الحذف');
+      await loadAll(); renderAnnouncements(); flash('🗑️');
     };
   });
   document.querySelectorAll('[data-tog-ann]').forEach(b => {
@@ -421,96 +454,26 @@ function renderAnnouncements() {
   });
 }
 
-function renderUniversities() {
-  $('panel').innerHTML = `
-    <div class="card">
-      <h2>➕ إضافة جامعة</h2>
-      <div class="grid2">
-        <div><label>الاسم *</label><input id="u_name"></div>
-        <div><label>الموقع</label><input id="u_loc"></div>
-      </div>
-      <label>الوصف</label>
-      <textarea id="u_desc"></textarea>
-      <div class="grid2">
-        <div><label>شارة</label><input id="u_badge"></div>
-        <div><label>السعر</label><input id="u_price"></div>
-      </div>
-      <div class="grid2">
-        <div><label>البلد</label><input id="u_cat"></div>
-        <div><label>التخصصات (فاصلة)</label><input id="u_majors"></div>
-      </div>
-      <label>صورة</label>
-      <input type="file" id="u_image" accept="image/*">
-      <img id="u_preview" class="preview">
-      <div class="row"><button id="u_save">💾 حفظ</button></div>
-    </div>
-    <div class="card">
-      <h2>🏛️ الجامعات (${DATA.universities.length})</h2>
-      ${DATA.universities.length === 0 ? '<div class="empty">لا توجد جامعات</div>' :
-        DATA.universities.map(u => `
-          <div class="item">
-            ${u.image_url ? `<img src="${esc(u.image_url)}" class="thumb" onerror="this.style.display='none'">` : '<div class="thumb" style="display:flex;align-items:center;justify-content:center;color:#ccc">🏛</div>'}
-            <div class="item-info"><b>${esc(u.name)}</b><span>${esc(u.location || '')}</span></div>
-            <button class="d" data-del-uni="${esc(u.id)}">حذف</button>
-          </div>
-        `).join('')}
-    </div>
-  `;
-  $('u_image').onchange = e => previewImage(e, 'u_preview');
-  $('u_save').onclick = async () => {
-    const name = $('u_name').value.trim();
-    if (!name) return flash('الاسم مطلوب', false);
-    $('u_save').disabled = true;
-    $('u_save').textContent = '⏳...';
-    const img = await uploadImage($('u_image').files[0]);
-    const majors = $('u_majors').value.split(',').map(x => x.trim()).filter(Boolean);
-    const { error } = await sb.from('universities').insert({
-      id: newId(), name,
-      location: $('u_loc').value.trim(),
-      description: $('u_desc').value.trim(),
-      badge: $('u_badge').value.trim(),
-      price_from: $('u_price').value.trim(),
-      category: $('u_cat').value.trim(),
-      majors, image_url: img, sort_order: DATA.universities.length,
-    });
-    $('u_save').disabled = false;
-    $('u_save').textContent = '💾 حفظ';
-    if (error) return flash('فشل: ' + error.message, false);
-    await loadAll(); renderUniversities(); flash('✅ تم الحفظ');
-  };
-  document.querySelectorAll('[data-del-uni]').forEach(b => {
-    b.onclick = async () => {
-      if (!confirm('حذف؟')) return;
-      await sb.from('universities').delete().eq('id', b.dataset.delUni);
-      await loadAll(); renderUniversities(); flash('🗑️');
-    };
-  });
-}
-
 function renderMajors() {
   $('panel').innerHTML = `
     <div class="card">
       <h2>➕ إضافة تخصص</h2>
       <label>الاسم</label>
       <input id="m_name">
-      <div class="row"><button id="m_save">➕ إضافة</button></div>
+      <div class="row"><button id="m_save">➕</button></div>
     </div>
     <div class="card">
       <h2>🎓 التخصصات (${DATA.majors.length})</h2>
       ${DATA.majors.length === 0 ? '<div class="empty">لا توجد تخصصات</div>' :
         DATA.majors.map(m => `
-          <div class="item">
-            <div class="item-info"><b>${esc(m.name)}</b></div>
-            <button class="d" data-del-maj="${esc(m.id)}">حذف</button>
-          </div>
+          <div class="item"><div class="item-info"><b>${esc(m.name)}</b></div><button class="d" data-del-maj="${esc(m.id)}">حذف</button></div>
         `).join('')}
     </div>
   `;
   $('m_save').onclick = async () => {
     const name = $('m_name').value.trim();
     if (!name) return flash('الاسم مطلوب', false);
-    const { error } = await sb.from('majors').insert({ id: newId(), name, sort_order: DATA.majors.length });
-    if (error) return flash('فشل: ' + error.message, false);
+    await sb.from('majors').insert({ id: newId(), name, sort_order: DATA.majors.length });
     await loadAll(); renderMajors(); flash('✅');
   };
   document.querySelectorAll('[data-del-maj]').forEach(b => {
@@ -524,15 +487,14 @@ function renderMajors() {
 function renderSettings() {
   const get = k => (DATA.settings.find(s => s.key === k) || {}).value || '';
   const groups = [
-    { title: '🏷️ الهوية والشعار', fields: [
+    { title: '🏷️ الهوية', fields: [
       ['brand_name', 'اسم الأكاديمية'],
       ['brand_tagline', 'الوصف القصير'],
       ['brand_logo_url', 'رابط الشعار (URL)'],
-      ['brand_description', 'وصف الفوتر'],
     ]},
-    { title: '🎯 Hero', fields: [
+    { title: '🎯 القسم الرئيسي (Hero)', fields: [
       ['hero_badge', 'الشارة'],
-      ['hero_title', 'العنوان'],
+      ['hero_title', 'العنوان الرئيسي'],
       ['hero_subtitle', 'الوصف'],
       ['hero_btn1_text', 'نص الزر 1'],
       ['hero_btn2_text', 'نص الزر 2'],
@@ -549,9 +511,9 @@ function renderSettings() {
       ['about_card4_title', 'كارت 4 — العنوان'],
       ['about_card4_desc', 'كارت 4 — الوصف'],
     ]},
-    { title: '🏛️ الجامعات', fields: [
-      ['universities_title', 'العنوان'],
-      ['universities_subtitle', 'الوصف'],
+    { title: '📚 البرامج الدراسية', fields: [
+      ['programs_title', 'العنوان'],
+      ['programs_subtitle', 'الوصف'],
     ]},
     { title: '📰 الأخبار', fields: [
       ['news_title', 'العنوان'],
@@ -565,8 +527,12 @@ function renderSettings() {
       ['contact_title', 'العنوان'],
       ['contact_subtitle', 'الوصف'],
       ['contact_phone', 'الهاتف'],
-      ['contact_email', 'الإيميل الرسمي'],
+      ['contact_email', 'الإيميل'],
       ['contact_address', 'العنوان'],
+    ]},
+    { title: '📄 الفوتر', fields: [
+      ['footer_text', 'نص الحقوق'],
+      ['footer_description', 'وصف الفوتر'],
     ]},
     { title: '🔗 السوشيال', fields: [
       ['social_facebook', 'فيسبوك'],
@@ -575,12 +541,12 @@ function renderSettings() {
       ['social_youtube', 'يوتيوب'],
       ['social_whatsapp', 'واتساب'],
     ]},
-    { title: '📄 الفوتر', fields: [['footer_text', 'نص الحقوق']] },
   ];
 
   $('panel').innerHTML = `
     <div class="card">
       <h2>⚙️ إعدادات الموقع</h2>
+      <p style="color:#45474c;font-size:13px;margin-bottom:20px">⚠️ اضغط "حفظ" بعد أي تعديل. التغييرات تظهر في الموقع مباشرة.</p>
       ${groups.map(g => `
         <div class="settings-group">
           <h3>${g.title}</h3>
@@ -605,7 +571,7 @@ function renderSettings() {
     $('set_save').disabled = false;
     $('set_save').textContent = '💾 حفظ كل الإعدادات';
     if (failed) flash(`فشل حفظ ${failed}`, false);
-    else { await loadAll(); await loadBrandInSidebar(); flash('✅ تم حفظ الإعدادات'); }
+    else { await loadAll(); await loadBrandInSidebar(); flash('✅ تم حفظ الإعدادات — افتح الموقع'); }
   };
 }
 
