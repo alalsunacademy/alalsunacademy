@@ -3,9 +3,7 @@ import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./supabase-config.js";
 
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const $ = id => document.getElementById(id);
-const esc = s => String(s ?? '').replace(/[&<>"']/g, c => (
-  {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]
-));
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
 
 let currentTab = 'news';
@@ -161,10 +159,10 @@ function renderNews() {
       <h2>➕ إضافة خبر</h2>
       <label>العنوان *</label>
       <input id="n_title">
-      <label>الوصف المختصر</label>
+      <label>الوصف المختصر (يظهر في الكارت)</label>
       <textarea id="n_summary"></textarea>
-      <label>المحتوى الكامل</label>
-      <textarea id="n_content"></textarea>
+      <label>المحتوى الكامل (يدعم HTML — النقاط، العناوين، إلخ)</label>
+      <textarea id="n_content" rows="8" placeholder="اكتب هنا تفاصيل الخبر.&#10;&#10;يدعم HTML مثل:&#10;<p>فقرة</p>&#10;<h3>عنوان</h3>&#10;<ul><li>نقطة 1</li><li>نقطة 2</li></ul>"></textarea>
       <div class="grid2">
         <div><label>التصنيف</label><input id="n_category" value="عام"></div>
         <div><label>صورة</label><input type="file" id="n_image" accept="image/*"></div>
@@ -179,6 +177,7 @@ function renderNews() {
           <div class="item">
             ${n.image_url ? `<img src="${esc(n.image_url)}" class="thumb" onerror="this.style.display='none'">` : '<div class="thumb"></div>'}
             <div class="item-info"><b>${esc(n.title)}</b><span>${esc(n.summary || '—')}</span><span class="pill">${esc(n.category || 'عام')}</span></div>
+            <a href="news.html?id=${esc(n.id)}" target="_blank" class="s" style="padding:8px 14px;font-size:12px;text-decoration:none;display:inline-block">👁️ عرض</a>
             <button class="d" data-del-news="${esc(n.id)}">حذف</button>
           </div>
         `).join('')}
@@ -340,24 +339,24 @@ function renderPrograms() {
     <div class="card">
       <h2>➕ إضافة برنامج دراسي</h2>
       <div class="grid2">
-        <div><label>اسم البرنامج *</label><input id="p_name" placeholder="مثال: بكالوريوس هندسة الحاسب"></div>
-        <div><label>الجامعة</label><input id="p_university" placeholder="مثال: جامعة القاهرة"></div>
+        <div><label>اسم البرنامج *</label><input id="p_name"></div>
+        <div><label>الجامعة</label><input id="p_university"></div>
       </div>
       <div class="grid2">
-        <div><label>الموقع</label><input id="p_loc" placeholder="القاهرة، مصر"></div>
-        <div><label>المدة</label><input id="p_duration" placeholder="4 سنوات"></div>
+        <div><label>الموقع</label><input id="p_loc"></div>
+        <div><label>المدة</label><input id="p_duration"></div>
       </div>
       <label>الوصف المختصر</label>
-      <textarea id="p_desc" placeholder="نبذة قصيرة تظهر في الكارت"></textarea>
+      <textarea id="p_desc"></textarea>
       <label>التفاصيل الكاملة (تظهر في صفحة التفاصيل)</label>
-      <textarea id="p_details" placeholder="معلومات مفصلة عن البرنامج، شروط القبول، الرسوم، إلخ..."></textarea>
+      <textarea id="p_details"></textarea>
       <div class="grid2">
-        <div><label>شارة (اختياري)</label><input id="p_badge" placeholder="معتمد"></div>
-        <div><label>السعر</label><input id="p_price" placeholder="من $3,200"></div>
+        <div><label>شارة</label><input id="p_badge"></div>
+        <div><label>السعر</label><input id="p_price"></div>
       </div>
       <div class="grid2">
-        <div><label>التخصص</label><input id="p_cat" placeholder="هندسة"></div>
-        <div><label>الكلمات المفتاحية (فاصلة)</label><input id="p_majors" placeholder="هندسة, حاسب"></div>
+        <div><label>التخصص</label><input id="p_cat"></div>
+        <div><label>كلمات مفتاحية (فاصلة)</label><input id="p_majors"></div>
       </div>
       <label>صورة</label>
       <input type="file" id="p_image" accept="image/*">
@@ -371,6 +370,7 @@ function renderPrograms() {
           <div class="item">
             ${p.image_url ? `<img src="${esc(p.image_url)}" class="thumb" onerror="this.style.display='none'">` : '<div class="thumb"></div>'}
             <div class="item-info"><b>${esc(p.name)}</b><span>${esc(p.university || '')} — ${esc(p.location || '')}</span><span class="pill">${esc(p.category || '')}</span></div>
+            <a href="program.html?id=${esc(p.id)}" target="_blank" class="s" style="padding:8px 14px;font-size:12px;text-decoration:none;display:inline-block">👁️ عرض</a>
             <button class="d" data-del-prog="${esc(p.id)}">حذف</button>
           </div>
         `).join('')}
@@ -492,7 +492,7 @@ function renderSettings() {
       ['brand_tagline', 'الوصف القصير'],
       ['brand_logo_url', 'رابط الشعار (URL)'],
     ]},
-    { title: '🎯 القسم الرئيسي (Hero)', fields: [
+    { title: '🎯 Hero', fields: [
       ['hero_badge', 'الشارة'],
       ['hero_title', 'العنوان الرئيسي'],
       ['hero_subtitle', 'الوصف'],
@@ -546,7 +546,7 @@ function renderSettings() {
   $('panel').innerHTML = `
     <div class="card">
       <h2>⚙️ إعدادات الموقع</h2>
-      <p style="color:#45474c;font-size:13px;margin-bottom:20px">⚠️ اضغط "حفظ" بعد أي تعديل. التغييرات تظهر في الموقع مباشرة.</p>
+      <p style="color:#45474c;font-size:13px;margin-bottom:20px">⚠️ اضغط "حفظ" بعد أي تعديل.</p>
       ${groups.map(g => `
         <div class="settings-group">
           <h3>${g.title}</h3>
@@ -571,7 +571,7 @@ function renderSettings() {
     $('set_save').disabled = false;
     $('set_save').textContent = '💾 حفظ كل الإعدادات';
     if (failed) flash(`فشل حفظ ${failed}`, false);
-    else { await loadAll(); await loadBrandInSidebar(); flash('✅ تم حفظ الإعدادات — افتح الموقع'); }
+    else { await loadAll(); await loadBrandInSidebar(); flash('✅ تم الحفظ — افتح الموقع'); }
   };
 }
 

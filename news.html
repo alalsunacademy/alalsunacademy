@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تفاصيل الخبر — الألسون</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Noto+Kufi+Arabic:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = { theme:{ extend:{
+  colors:{"primary":"#091426","primary-container":"#1e293b","secondary":"#0058be","secondary-fixed":"#d8e2ff","on-secondary-fixed-variant":"#004395","surface":"#ffffff","surface-container":"#eceef0","surface-container-low":"#f2f4f6","on-surface":"#191c1e","on-surface-variant":"#45474c","outline-variant":"#c5c6cd"},
+  borderRadius:{DEFAULT:"0.25rem",lg:"0.5rem",xl:"0.75rem","2xl":"1rem","3xl":"1.5rem",full:"9999px"},
+  fontFamily:{sans:["Noto Kufi Arabic","Plus Jakarta Sans","sans-serif"]}
+}}}
+</script>
+<style>
+@layer base{html,body{margin:0;padding:0;font-family:'Noto Kufi Arabic','Plus Jakarta Sans',sans-serif}}
+::-webkit-scrollbar{display:none}
+#brandLogo{display:none}
+.header-logo{width:40px;height:40px;border-radius:50%;object-fit:contain;background:#fff;flex-shrink:0;border:1px solid #e0e3e5}
+.header-brand{display:flex;align-items:center;gap:8px;min-width:0;text-decoration:none}
+.header-brand .brand-text{font-size:13px;font-weight:700;color:#091426;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.3}
+.news-content{font-size:16px;line-height:1.9;color:#191c1e}
+.news-content p{margin-bottom:16px}
+.news-content h2,.news-content h3{font-size:20px;font-weight:700;color:#091426;margin:24px 0 12px}
+.news-content ul,.news-content ol{padding-right:24px;margin-bottom:16px}
+.news-content li{margin-bottom:8px}
+.news-content strong{font-weight:700;color:#091426}
+.news-content a{color:#0058be;text-decoration:underline}
+.news-content img{max-width:100%;height:auto;border-radius:12px;margin:16px 0}
+@media(max-width:640px){
+  .header-brand .brand-text{font-size:11px}
+  .news-content{font-size:15px;line-height:1.8}
+  .news-content h2,.news-content h3{font-size:18px}
+}
+</style>
+</head>
+<body class="bg-white text-on-surface antialiased">
+
+<header class="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-xl border-b border-surface-container">
+  <div class="h-16 sm:h-20 max-w-7xl mx-auto px-3 sm:px-6 flex items-center justify-between gap-4">
+    <a href="site.html" class="header-brand">
+      <img id="brandLogo" src="" alt="logo" class="header-logo" onerror="this.style.display='none';document.getElementById('brandLogoFallback').style.display='flex'">
+      <div id="brandLogoFallback" class="header-logo bg-secondary text-white flex items-center justify-center font-bold text-[10px]" style="display:none">الألسون</div>
+      <span class="brand-text" id="brandName">الألسون</span>
+    </a>
+    <nav class="hidden xl:flex items-center gap-3">
+      <a class="text-on-surface-variant hover:text-secondary py-2 text-sm" href="site.html#programs">البرامج</a>
+      <a class="text-secondary font-bold py-2 text-sm" href="site.html#news">الأخبار</a>
+      <a class="text-on-surface-variant hover:text-secondary py-2 text-sm" href="gallery.html">معرض الصور</a>
+      <a class="text-on-surface-variant hover:text-secondary py-2 text-sm" href="site.html#contact">اتصل بنا</a>
+    </nav>
+    <a href="site.html#news" class="text-sm text-secondary font-semibold flex items-center gap-1">← رجوع</a>
+  </div>
+</header>
+
+<main class="w-full pt-16 sm:pt-20 bg-white min-h-screen">
+  <div id="loading" class="text-center py-20 text-on-surface-variant">جاري التحميل...</div>
+  <div id="content" class="hidden">
+    <div class="max-w-4xl mx-auto px-3 sm:px-6 py-6">
+      <nav class="text-xs sm:text-sm text-on-surface-variant mb-4 flex flex-wrap items-center gap-2">
+        <a href="site.html" class="hover:text-secondary">الرئيسية</a>
+        <span>/</span>
+        <a href="site.html#news" class="hover:text-secondary">الأخبار</a>
+        <span>/</span>
+        <span class="text-secondary font-bold truncate" id="bcTitle"></span>
+      </nav>
+      <div class="flex items-center gap-3 mb-4 flex-wrap">
+        <span id="nCategory" class="inline-block px-3 py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed-variant text-xs font-bold"></span>
+        <span class="text-sm text-on-surface-variant">📅 <span id="nDate"></span></span>
+      </div>
+      <h1 id="nTitle" class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-primary leading-tight mb-4"></h1>
+      <p id="nSummary" class="text-base sm:text-lg text-on-surface-variant leading-relaxed mb-6"></p>
+      <div id="nImageWrap" class="relative aspect-[16/9] rounded-2xl overflow-hidden bg-surface-container-low mb-8">
+        <img id="nImage" src="" class="w-full h-full object-cover" alt="">
+      </div>
+      <article id="nContent" class="news-content"></article>
+      <div class="mt-10 pt-6 border-t border-surface-container flex flex-col sm:flex-row items-center justify-between gap-4">
+        <a href="site.html#news" class="px-6 py-3 bg-secondary text-white rounded-full font-semibold hover:opacity-90">← العودة للأخبار</a>
+        <div class="flex gap-2">
+          <button id="shareBtn" class="w-10 h-10 rounded-full bg-surface-container-low hover:bg-secondary hover:text-white flex items-center justify-center transition" title="مشاركة">
+            <span class="material-symbols-outlined text-[20px]">share</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="error" class="hidden text-center py-20">
+    <div class="text-6xl mb-4">📰</div>
+    <h2 class="text-2xl font-bold text-primary mb-2">الخبر غير موجود</h2>
+    <a href="site.html#news" class="text-secondary font-bold">← العودة للأخبار</a>
+  </div>
+</main>
+
+<script type="module">
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm";
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./supabase-config.js";
+
+const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+async function load() {
+  const { data: settings } = await sb.from('settings').select('*').in('key', ['brand_name', 'brand_logo_url']);
+  settings?.forEach(s => {
+    if (s.key === 'brand_name' && s.value) { $('brandName').textContent = s.value; document.title = s.value; }
+    if (s.key === 'brand_logo_url' && s.value) {
+      const logo = $('brandLogo');
+      logo.src = s.value;
+      logo.style.display = 'block';
+      logo.onload = () => $('brandLogoFallback').style.display = 'none';
+      logo.onerror = () => { logo.style.display = 'none'; $('brandLogoFallback').style.display = 'flex'; };
+    }
+  });
+
+  const id = new URLSearchParams(location.search).get('id');
+  if (!id) { $('loading').classList.add('hidden'); $('error').classList.remove('hidden'); return; }
+
+  const { data, error } = await sb.from('news').select('*').eq('id', id).single();
+  $('loading').classList.add('hidden');
+
+  if (error || !data) { $('error').classList.remove('hidden'); return; }
+
+  $('content').classList.remove('hidden');
+  if (data.title) { $('nTitle').textContent = data.title; $('bcTitle').textContent = data.title; document.title = data.title; }
+  if (data.summary) $('nSummary').textContent = data.summary;
+  if (data.category) $('nCategory').textContent = data.category;
+  if (data.created_at) $('nDate').textContent = new Date(data.created_at).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
+
+  if (data.image_url) {
+    $('nImage').src = data.image_url;
+    $('nImage').alt = data.title || '';
+  } else {
+    $('nImageWrap').style.display = 'none';
+  }
+
+  const content = data.content || data.summary || '';
+  if (content) {
+    if (/<[a-z][\s\S]*>/i.test(content)) {
+      $('nContent').innerHTML = content;
+    } else {
+      $('nContent').innerHTML = content
+        .split(/\n\n+/)
+        .map(p => `<p>${esc(p).replace(/\n/g, '<br>')}</p>`)
+        .join('');
+    }
+  } else {
+    $('nContent').innerHTML = '<p class="text-on-surface-variant italic">لا يوجد محتوى إضافي.</p>';
+  }
+
+  $('shareBtn').onclick = async () => {
+    const url = location.href;
+    if (navigator.share) {
+      try { await navigator.share({ title: data.title, url }); } catch {}
+    } else {
+      await navigator.clipboard.writeText(url);
+      alert('تم نسخ الرابط');
+    }
+  };
+}
+
+load().catch(e => { console.error(e); $('loading').classList.add('hidden'); $('error').classList.remove('hidden'); });
+</script>
+</body>
+</html>
