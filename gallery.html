@@ -39,6 +39,9 @@ tailwind.config = { darkMode:"class", theme:{ extend:{
 .line-clamp-1{display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
 .line-clamp-2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 
+/* منع أي horizontal scroll */
+html,body{max-width:100%;overflow-x:hidden}
+
 #brandLogo{display:none}
 .header-logo{width:40px;height:40px;border-radius:50%;object-fit:contain;background:#fff;flex-shrink:0;border:1px solid #e0e3e5}
 .header-brand{display:flex;align-items:center;gap:8px;min-width:0;flex:1;text-decoration:none}
@@ -54,6 +57,11 @@ tailwind.config = { darkMode:"class", theme:{ extend:{
   .header-brand .brand-text{font-size:10px}
   .header-logo{width:34px;height:34px}
 }
+@media(max-width:380px){
+  .lightbox-img{max-height:40vh}
+  .header-brand .brand-text{font-size:9px;max-width:100px}
+  .header-logo{width:30px;height:30px}
+}
 </style>
 </head>
 <body class="bg-white font-body-md text-body-md text-on-surface antialiased">
@@ -66,9 +74,10 @@ tailwind.config = { darkMode:"class", theme:{ extend:{
       <span class="brand-text" id="brandName">الألسون للعلوم الحديثة وتكنولوجيا المعلومات</span>
     </a>
     <nav class="hidden xl:flex items-center gap-3 lg:gap-4">
-      <a class="text-on-surface-variant hover:text-secondary py-2 text-sm whitespace-nowrap" href="site.html#universities">الجامعات</a>
+      <a class="text-on-surface-variant hover:text-secondary py-2 text-sm whitespace-nowrap" href="site.html#programs">البرامج</a>
       <a class="text-on-surface-variant hover:text-secondary py-2 text-sm whitespace-nowrap" href="site.html#news">الأخبار</a>
       <a class="text-secondary font-bold py-2 text-sm whitespace-nowrap" href="gallery.html">معرض الصور</a>
+      <a class="text-on-surface-variant hover:text-secondary py-2 text-sm whitespace-nowrap" href="site.html#about">من نحن</a>
       <a class="text-on-surface-variant hover:text-secondary py-2 text-sm whitespace-nowrap" href="site.html#contact">اتصل بنا</a>
       <a class="text-on-surface-variant hover:text-secondary py-2 text-sm whitespace-nowrap" href="admin.html">لوحة التحكم</a>
     </nav>
@@ -77,9 +86,11 @@ tailwind.config = { darkMode:"class", theme:{ extend:{
     </button>
   </div>
   <nav id="mobileMenu" class="xl:hidden hidden bg-white border-t border-surface-container-high px-3 sm:px-4 py-3">
-    <a class="block py-2 text-on-surface-variant hover:text-secondary text-sm" href="site.html#universities">الجامعات</a>
+    <a class="block py-2 text-on-surface-variant hover:text-secondary text-sm" href="site.html">الرئيسية</a>
+    <a class="block py-2 text-on-surface-variant hover:text-secondary text-sm" href="site.html#programs">البرامج</a>
     <a class="block py-2 text-on-surface-variant hover:text-secondary text-sm" href="site.html#news">الأخبار</a>
     <a class="block py-2 text-secondary font-bold text-sm" href="gallery.html">معرض الصور</a>
+    <a class="block py-2 text-on-surface-variant hover:text-secondary text-sm" href="site.html#about">من نحن</a>
     <a class="block py-2 text-on-surface-variant hover:text-secondary text-sm" href="site.html#contact">اتصل بنا</a>
     <a class="block py-2 text-on-surface-variant hover:text-secondary text-sm" href="admin.html">لوحة التحكم</a>
   </nav>

@@ -17,41 +17,69 @@ tailwind.config = { theme:{ extend:{
 <style>
 @layer base{html,body{margin:0;padding:0;font-family:'Noto Kufi Arabic','Plus Jakarta Sans',sans-serif}}
 ::-webkit-scrollbar{display:none}
+
+/* منع أي horizontal scroll */
+html,body{max-width:100%;overflow-x:hidden}
+
 #brandLogo{display:none}
 .header-logo{width:40px;height:40px;border-radius:50%;object-fit:contain;background:#fff;flex-shrink:0;border:1px solid #e0e3e5}
 .header-brand{display:flex;align-items:center;gap:8px;min-width:0;text-decoration:none}
 .header-brand .brand-text{font-size:13px;font-weight:700;color:#091426;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 @media(max-width:640px){.header-brand .brand-text{font-size:11px}}
+@media(max-width:360px){
+  .header-brand .brand-text{font-size:10px;max-width:120px}
+  .header-logo{width:32px;height:32px}
+}
 </style>
 </head>
 <body class="bg-white text-on-surface antialiased">
 
 <header class="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-xl border-b border-surface-container">
-  <div class="h-16 sm:h-20 max-w-7xl mx-auto px-3 sm:px-6 flex items-center justify-between gap-4">
+  <div class="h-16 sm:h-20 max-w-7xl mx-auto px-3 sm:px-6 flex items-center justify-between gap-2 sm:gap-4">
     <a href="site.html" class="header-brand">
       <img id="brandLogo" src="" alt="logo" class="header-logo" onerror="this.style.display='none';document.getElementById('brandLogoFallback').style.display='flex'">
       <div id="brandLogoFallback" class="header-logo bg-secondary text-white flex items-center justify-center font-bold text-[10px]" style="display:none">الألسون</div>
       <span class="brand-text" id="brandName">الألسون</span>
     </a>
     <nav class="hidden xl:flex items-center gap-3">
-      <a class="text-on-surface-variant hover:text-secondary py-2 text-sm" href="site.html#programs">البرامج</a>
-      <a class="text-on-surface-variant hover:text-secondary py-2 text-sm" href="site.html#news">الأخبار</a>
-      <a class="text-on-surface-variant hover:text-secondary py-2 text-sm" href="gallery.html">معرض الصور</a>
-      <a class="text-on-surface-variant hover:text-secondary py-2 text-sm" href="site.html#contact">اتصل بنا</a>
+      <a class="text-secondary font-bold py-2 text-sm whitespace-nowrap" href="site.html#programs">البرامج</a>
+      <a class="text-on-surface-variant hover:text-secondary py-2 text-sm whitespace-nowrap" href="site.html#news">الأخبار</a>
+      <a class="text-on-surface-variant hover:text-secondary py-2 text-sm whitespace-nowrap" href="gallery.html">معرض الصور</a>
+      <a class="text-on-surface-variant hover:text-secondary py-2 text-sm whitespace-nowrap" href="site.html#about">من نحن</a>
+      <a class="text-on-surface-variant hover:text-secondary py-2 text-sm whitespace-nowrap" href="site.html#contact">اتصل بنا</a>
+      <a class="text-on-surface-variant hover:text-secondary py-2 text-sm whitespace-nowrap" href="admin.html">لوحة التحكم</a>
     </nav>
-    <a href="site.html" class="text-sm text-secondary font-semibold">← رجوع</a>
+    <button id="mobileMenuBtn" class="xl:hidden p-2 text-on-surface-variant hover:text-primary rounded-lg flex-shrink-0" aria-label="القائمة">
+      <span class="material-symbols-outlined text-[24px] sm:text-[26px]">menu</span>
+    </button>
   </div>
+  <nav id="mobileMenu" class="xl:hidden hidden bg-white border-t border-surface-container px-3 sm:px-4 py-3">
+    <a class="block py-2 text-on-surface-variant hover:text-secondary text-sm" href="site.html">الرئيسية</a>
+    <a class="block py-2 text-secondary font-bold text-sm" href="site.html#programs">البرامج</a>
+    <a class="block py-2 text-on-surface-variant hover:text-secondary text-sm" href="site.html#news">الأخبار</a>
+    <a class="block py-2 text-on-surface-variant hover:text-secondary text-sm" href="gallery.html">معرض الصور</a>
+    <a class="block py-2 text-on-surface-variant hover:text-secondary text-sm" href="site.html#about">من نحن</a>
+    <a class="block py-2 text-on-surface-variant hover:text-secondary text-sm" href="site.html#contact">اتصل بنا</a>
+    <a class="block py-2 text-on-surface-variant hover:text-secondary text-sm" href="admin.html">لوحة التحكم</a>
+  </nav>
 </header>
+
+<script>
+document.getElementById('mobileMenuBtn').onclick = () => {
+  document.getElementById('mobileMenu').classList.toggle('hidden');
+};
+document.querySelectorAll('#mobileMenu a').forEach(a => a.onclick = () => document.getElementById('mobileMenu').classList.add('hidden'));
+</script>
 
 <main class="w-full pt-16 sm:pt-20 bg-white min-h-screen">
   <div id="loading" class="text-center py-20 text-on-surface-variant">جاري التحميل...</div>
   <div id="content" class="hidden">
     <div class="max-w-5xl mx-auto px-3 sm:px-6 py-6">
-      <nav class="text-xs sm:text-sm text-on-surface-variant mb-4">
+      <nav class="text-xs sm:text-sm text-on-surface-variant mb-4 flex flex-wrap items-center gap-2">
         <a href="site.html" class="hover:text-secondary">الرئيسية</a>
-        <span class="mx-2">/</span>
+        <span>/</span>
         <a href="site.html#programs" class="hover:text-secondary">البرامج</a>
-        <span class="mx-2">/</span>
+        <span>/</span>
         <span class="text-secondary font-bold" id="bcName"></span>
       </nav>
       <div class="relative aspect-[16/9] sm:aspect-[21/9] rounded-2xl overflow-hidden bg-surface-container-low mb-6">

@@ -22,6 +22,9 @@ tailwind.config = { theme:{ extend:{
 .line-clamp-3{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 html{scroll-behavior:smooth;scroll-padding-top:80px}
 
+/* منع أي horizontal scroll */
+html,body{max-width:100%;overflow-x:hidden}
+
 .carousel-track{display:flex;gap:1rem;overflow-x:auto;scroll-behavior:smooth;padding:0.5rem 0 1.5rem;cursor:grab;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
 .carousel-track::-webkit-scrollbar{height:6px}
 .carousel-track::-webkit-scrollbar-track{background:#eceef0;border-radius:99px}
@@ -85,6 +88,7 @@ html{scroll-behavior:smooth;scroll-padding-top:80px}
     </button>
   </div>
   <nav id="mobileMenu" class="xl:hidden hidden bg-white border-t border-surface-container px-4 py-3">
+    <a class="block py-2 text-secondary font-bold text-sm" href="site.html">الرئيسية</a>
     <a class="block py-2 text-on-surface-variant hover:text-secondary text-sm" href="#programs">البرامج</a>
     <a class="block py-2 text-on-surface-variant hover:text-secondary text-sm" href="#news">الأخبار</a>
     <a class="block py-2 text-on-surface-variant hover:text-secondary text-sm" href="#gallery-preview">معرض الصور</a>
@@ -152,12 +156,12 @@ html{scroll-behavior:smooth;scroll-padding-top:80px}
 
 <section id="gallery-preview" class="w-full py-10 sm:py-16 bg-surface-container-low hidden">
   <div class="max-w-7xl mx-auto px-3 sm:px-6">
-    <div class="flex items-end justify-between mb-6">
+    <div class="flex items-end justify-between mb-6 gap-3 flex-wrap">
       <div>
         <h2 id="galleryTitle" class="text-2xl sm:text-3xl text-primary font-bold mb-2"></h2>
         <p id="gallerySubtitle" class="text-sm text-on-surface-variant"></p>
       </div>
-      <a href="gallery.html" class="px-4 py-2 bg-white text-secondary border border-secondary rounded-full text-xs sm:text-sm font-semibold hover:bg-secondary hover:text-white transition">عرض الكل ←</a>
+      <a href="gallery.html" class="px-4 py-2 bg-white text-secondary border border-secondary rounded-full text-xs sm:text-sm font-semibold hover:bg-secondary hover:text-white transition whitespace-nowrap">عرض الكل ←</a>
     </div>
     <div id="galleryGrid" class="carousel-track"></div>
   </div>

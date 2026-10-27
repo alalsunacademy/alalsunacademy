@@ -40,6 +40,7 @@ label{display:block;margin:12px 0 6px;color:var(--mu);font-size:13px;font-weight
 .content-header h1{font-size:24px;font-weight:700;color:var(--primary)}
 .view-site{padding:8px 16px;background:#fff;border:1px solid var(--bd);border-radius:8px;color:var(--mu);text-decoration:none;font-size:13px;font-weight:600;transition:all .15s;white-space:nowrap}
 .view-site:hover{background:var(--ac);color:#fff;border-color:var(--ac)}
+.header-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 
 .card{background:var(--card);border-radius:12px;padding:24px;margin-bottom:20px;box-shadow:0 1px 4px rgba(0,0,0,0.05);border:1px solid var(--bd)}
 .card h2{font-size:18px;margin-bottom:16px;color:var(--primary);padding-bottom:12px;border-bottom:1px solid var(--bd)}
@@ -64,6 +65,9 @@ label{display:block;margin:12px 0 6px;color:var(--mu);font-size:13px;font-weight
 .settings-group:last-child{border-bottom:0;margin-bottom:0;padding-bottom:0}
 .settings-group h3{font-size:15px;color:var(--ac);margin-bottom:16px;font-weight:700}
 
+/* منع أي horizontal scroll */
+html,body{max-width:100%;overflow-x:hidden}
+
 @media(max-width:900px){
   .app{grid-template-columns:1fr}
   .sidebar{position:relative;height:auto;padding:16px}
@@ -81,4 +85,13 @@ label{display:block;margin:12px 0 6px;color:var(--mu);font-size:13px;font-weight
   .item-info b{font-size:13px}
   .content-header h1{font-size:18px}
   .login-card{padding:24px}
+}
+@media(max-width:360px){
+  .sidebar nav button{min-width:70px;font-size:10px;padding:6px 4px}
+  .content-header h1{font-size:16px}
+  .card{padding:12px}
+  .brand-name{font-size:11px}
+  .brand-sub{font-size:10px}
+  .login-card{padding:20px 16px}
+  .login-card h1{font-size:17px}
 }
