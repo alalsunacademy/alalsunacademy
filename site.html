@@ -41,7 +41,9 @@ html,body{max-width:100%;overflow-x:hidden}
 .carousel-year{font-size:11px;color:#d8e2ff;display:block;margin-bottom:4px}
 .carousel-title{font-size:15px;font-weight:700;line-height:1.4;-webkit-line-clamp:1;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden}
 
-#brandLogo{display:none}
+/* خلفية الهيرو: صورة hero.jpg بنفس المقاس على كل الشاشات */
+.hero-bg{background-color:#091426;background-image:linear-gradient(rgba(9,20,38,.65),rgba(9,20,38,.65)),url('hero.jpg'),linear-gradient(to bottom,#091426,#1e293b,#ffffff);background-size:cover,cover,cover;background-position:center;background-repeat:no-repeat}
+#mobileMenu{max-height:calc(100vh - 4rem);overflow-y:auto}
 .header-logo{width:40px;height:40px;border-radius:50%;object-fit:contain;background:#fff;flex-shrink:0;border:1px solid #e0e3e5}
 .header-brand{display:flex;align-items:center;gap:8px;min-width:0;flex:1;text-decoration:none}
 .header-brand .brand-text{font-size:13px;font-weight:700;color:#091426;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.3}
@@ -54,6 +56,7 @@ html,body{max-width:100%;overflow-x:hidden}
   .carousel-img-wrap{height:200px}
 }
 @media(max-width:640px){
+  #contactForm input,#contactForm textarea{font-size:16px}
   .carousel-card{flex:0 0 85vw;max-width:85vw}
   .carousel-img-wrap{height:180px}
   .header-brand .brand-text{font-size:11px}
@@ -71,7 +74,7 @@ html,body{max-width:100%;overflow-x:hidden}
 <header class="fixed top-0 left-0 right-0 w-full z-50 bg-white/95 backdrop-blur-xl border-b border-surface-container">
   <div class="h-16 sm:h-20 max-w-7xl mx-auto px-3 sm:px-6 flex items-center justify-between gap-2 sm:gap-4">
     <a href="site.html" class="header-brand">
-      <img id="brandLogo" src="" alt="logo" class="header-logo" onerror="this.style.display='none';document.getElementById('brandLogoFallback').style.display='flex'">
+      <img id="brandLogo" src="icon.png" alt="logo" class="header-logo" onerror="this.style.display='none';document.getElementById('brandLogoFallback').style.display='flex'">
       <div id="brandLogoFallback" class="header-logo bg-secondary text-white flex items-center justify-center font-bold text-[10px]" style="display:none">الألسون</div>
       <span class="brand-text" id="brandName">الألسون</span>
     </a>
@@ -100,11 +103,11 @@ html,body{max-width:100%;overflow-x:hidden}
 
 <main class="w-full pt-16 sm:pt-20 bg-white min-h-screen">
 
-<section id="hero" class="w-full bg-gradient-to-b from-primary via-primary-container to-white text-white py-10 sm:py-16 hidden">
+<section id="hero" class="w-full hero-bg text-white py-10 sm:py-16 hidden">
   <div class="max-w-7xl mx-auto px-3 sm:px-6 text-center">
     <div id="heroBadge" class="inline-block px-4 py-1 rounded-full bg-white/10 backdrop-blur-md text-xs sm:text-sm mb-4"></div>
-    <h1 id="heroTitle" class="text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight mb-4"></h1>
-    <p id="heroSubtitle" class="text-base sm:text-lg max-w-3xl mx-auto mb-6 opacity-90"></p>
+    <h1 id="heroTitle" class="text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight mb-4 break-words"></h1>
+    <p id="heroSubtitle" class="text-base sm:text-lg max-w-3xl mx-auto mb-6 opacity-90 break-words"></p>
     <div class="flex flex-col sm:flex-row gap-3 justify-center">
       <a id="heroBtn1" href="#programs" class="px-6 py-3 bg-secondary text-white rounded-full font-bold hover:opacity-90 hidden"></a>
       <a id="heroBtn2" href="#contact" class="px-6 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white rounded-full font-bold hidden"></a>
@@ -114,7 +117,7 @@ html,body{max-width:100%;overflow-x:hidden}
 
 <section id="ticker" class="w-full bg-secondary text-white hidden">
   <div class="max-w-7xl mx-auto px-3 sm:px-6 py-3 flex flex-col sm:flex-row items-center justify-between gap-2">
-    <div class="flex items-center gap-2"><span class="px-3 py-1 bg-white text-secondary rounded-full text-xs">📢 إعلان</span><p id="tickerText" class="text-sm"></p></div>
+    <div class="flex items-center gap-2"><span class="px-3 py-1 bg-white text-secondary rounded-full text-xs">📢 إعلان</span><p id="tickerText" class="text-sm min-w-0 break-words"></p></div>
     <a id="tickerLink" href="#" class="px-4 py-1 bg-white/15 rounded-full text-xs">التفاصيل ←</a>
   </div>
 </section>
@@ -175,17 +178,19 @@ html,body{max-width:100%;overflow-x:hidden}
         <p id="contactSubtitle" class="text-sm text-gray-300 mb-6"></p>
         <div class="flex flex-col gap-3">
           <div class="flex items-center gap-3" id="contactPhoneWrap"><div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0">📞</div><div><div class="text-xs text-gray-400">الهاتف</div><div id="cPhone" class="text-sm" dir="ltr"></div></div></div>
-          <div class="flex items-center gap-3" id="contactEmailWrap"><div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0">✉</div><div><div class="text-xs text-gray-400">البريد</div><a id="cEmail" href="mailto:" class="text-sm hover:underline"></a></div></div>
-          <div class="flex items-center gap-3" id="contactAddressWrap"><div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0">📍</div><div><div class="text-xs text-gray-400">العنوان</div><div id="cAddress" class="text-sm"></div></div></div>
+          <div class="flex items-center gap-3" id="contactEmailWrap"><div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0">✉</div><div class="min-w-0"><div class="text-xs text-gray-400">البريد</div><a id="cEmail" href="mailto:" class="text-sm hover:underline break-all"></a></div></div>
+          <div class="flex items-center gap-3" id="contactAddressWrap"><div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0">📍</div><div class="min-w-0"><div class="text-xs text-gray-400">العنوان</div><div id="cAddress" class="text-sm break-words"></div></div></div>
         </div>
       </div>
       <div class="lg:col-span-7 p-6 sm:p-10 bg-white text-on-surface">
         <h3 class="text-xl sm:text-2xl text-primary font-bold mb-4">أرسل رسالة</h3>
-        <form id="contactForm" class="flex flex-col gap-3" onsubmit="event.preventDefault();document.getElementById('contactForm').classList.add('hidden');document.getElementById('contactSuccess').classList.remove('hidden')">
-          <input required class="w-full px-4 py-2.5 bg-surface-container-low rounded-xl border border-transparent focus:border-secondary focus:outline-none text-sm" placeholder="الاسم *">
-          <input required class="w-full px-4 py-2.5 bg-surface-container-low rounded-xl border border-transparent focus:border-secondary focus:outline-none text-sm" placeholder="البريد *" type="email" dir="ltr">
-          <textarea class="w-full px-4 py-2 bg-surface-container-low rounded-xl border border-transparent focus:border-secondary focus:outline-none resize-none text-sm" placeholder="رسالتك" rows="4"></textarea>
-          <button class="w-full py-3 bg-secondary text-white rounded-xl font-semibold text-sm">إرسال</button>
+        <form id="contactForm" class="flex flex-col gap-3">
+          <input type="text" name="_honey" style="display:none" tabindex="-1" autocomplete="off">
+          <input required class="w-full px-4 py-2.5 bg-surface-container-low rounded-xl border border-transparent focus:border-secondary focus:outline-none text-sm" name="name" placeholder="الاسم *">
+          <input required class="w-full px-4 py-2.5 bg-surface-container-low rounded-xl border border-transparent focus:border-secondary focus:outline-none text-sm" name="email" placeholder="البريد *" type="email" dir="ltr">
+          <textarea class="w-full px-4 py-2 bg-surface-container-low rounded-xl border border-transparent focus:border-secondary focus:outline-none resize-none text-sm" name="message" placeholder="رسالتك" rows="4"></textarea>
+          <p id="contactError" class="hidden text-sm text-red-600"></p>
+          <button type="submit" class="w-full py-3 bg-secondary text-white rounded-xl font-semibold text-sm disabled:opacity-60">إرسال</button>
         </form>
         <div id="contactSuccess" class="hidden flex-col items-center justify-center text-center p-8 bg-surface-container-low rounded-2xl gap-3"><div class="text-5xl text-secondary">✓</div><h4 class="text-primary font-bold text-lg">تم استلام رسالتك!</h4></div>
       </div>
@@ -239,6 +244,65 @@ document.getElementById('mobileMenuBtn').onclick = () => {
   document.getElementById('mobileMenu').classList.toggle('hidden');
 };
 document.querySelectorAll('#mobileMenu a').forEach(a => a.onclick = () => document.getElementById('mobileMenu').classList.add('hidden'));
+</script>
+
+<script>
+/* الشعار ثابت من الملف icon.png حتى لو الإعدادات حاولت تغييره */
+(function(){
+  var l = document.getElementById('brandLogo');
+  if (!l) return;
+  new MutationObserver(function(){
+    if (l.getAttribute('src') !== 'icon.png') l.setAttribute('src', 'icon.png');
+  }).observe(l, {attributes:true, attributeFilter:['src']});
+})();
+</script>
+
+<script>
+/* ===== نموذج التواصل: الرسائل توصل على الإيميل ===== */
+const CONTACT_EMAIL = 'moh20053ed@gmail.com'; // ← حط إيميلك هنا
+document.getElementById('contactForm').addEventListener('submit', async function(e){
+  e.preventDefault();
+  const form = e.currentTarget;
+  const btn = form.querySelector('button[type="submit"]');
+  const err = document.getElementById('contactError');
+  const showErr = msg => { err.textContent = msg; err.classList.remove('hidden'); };
+  err.classList.add('hidden');
+
+  if (!CONTACT_EMAIL || CONTACT_EMAIL === 'PUT_YOUR_EMAIL_HERE') {
+    showErr('خدمة استقبال الرسائل غير مفعّلة بعد.');
+    return;
+  }
+  const fd = new FormData(form);
+  if (fd.get('_honey')) return;
+  const payload = {
+    name: fd.get('name'),
+    email: fd.get('email'),
+    message: fd.get('message') || '(بدون نص)',
+    _subject: 'رسالة جديدة من موقع الألسون',
+    _replyto: fd.get('email'),
+    _template: 'table',
+    _captcha: 'false'
+  };
+  const oldText = btn.textContent;
+  btn.disabled = true; btn.textContent = 'جاري الإرسال...';
+  try {
+    const res = await fetch('https://formsubmit.co/ajax/' + encodeURIComponent(CONTACT_EMAIL), {
+      method: 'POST',
+      headers: {'Content-Type':'application/json','Accept':'application/json'},
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.success === 'false' || data.success === false) throw new Error(data.message || 'send failed');
+    form.reset();
+    form.classList.add('hidden');
+    document.getElementById('contactSuccess').classList.remove('hidden');
+  } catch (ex) {
+    console.error('[contact]', ex);
+    showErr('تعذّر إرسال الرسالة، حاول مرة أخرى بعد قليل.');
+  } finally {
+    btn.disabled = false; btn.textContent = oldText;
+  }
+});
 </script>
 
 <script type="module" src="site.js"></script>

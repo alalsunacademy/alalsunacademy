@@ -18,22 +18,12 @@ let currentAlbumIdx = 0;
 
 async function loadBrand() {
   try {
-    const { data } = await sb.from('settings').select('*').in('key', ['brand_name', 'brand_logo_url']);
+    const { data } = await sb.from('settings').select('*').in('key', ['brand_name']);
     const S = {};
     (data || []).forEach(s => { if (s.value) S[s.key] = s.value; });
     if (S.brand_name) {
       document.title = 'معرض الصور — ' + S.brand_name;
       const bn = $('brandName'); if (bn) bn.textContent = S.brand_name;
-    }
-    if (S.brand_logo_url) {
-      const logo = $('brandLogo');
-      const fallback = $('brandLogoFallback');
-      if (logo) {
-        logo.src = S.brand_logo_url;
-        logo.style.display = 'block';
-        logo.onload = () => { if (fallback) fallback.style.display = 'none'; };
-        logo.onerror = () => { logo.style.display = 'none'; if (fallback) fallback.style.display = 'flex'; };
-      }
     }
   } catch (e) { console.error('brand load:', e); }
 }

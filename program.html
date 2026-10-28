@@ -21,7 +21,6 @@ tailwind.config = { theme:{ extend:{
 /* منع أي horizontal scroll */
 html,body{max-width:100%;overflow-x:hidden}
 
-#brandLogo{display:none}
 .header-logo{width:40px;height:40px;border-radius:50%;object-fit:contain;background:#fff;flex-shrink:0;border:1px solid #e0e3e5}
 .header-brand{display:flex;align-items:center;gap:8px;min-width:0;text-decoration:none}
 .header-brand .brand-text{font-size:13px;font-weight:700;color:#091426;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -37,7 +36,7 @@ html,body{max-width:100%;overflow-x:hidden}
 <header class="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-xl border-b border-surface-container">
   <div class="h-16 sm:h-20 max-w-7xl mx-auto px-3 sm:px-6 flex items-center justify-between gap-2 sm:gap-4">
     <a href="site.html" class="header-brand">
-      <img id="brandLogo" src="" alt="logo" class="header-logo" onerror="this.style.display='none';document.getElementById('brandLogoFallback').style.display='flex'">
+      <img id="brandLogo" src="icon.png" alt="logo" class="header-logo" onerror="this.style.display='none';document.getElementById('brandLogoFallback').style.display='flex'">
       <div id="brandLogoFallback" class="header-logo bg-secondary text-white flex items-center justify-center font-bold text-[10px]" style="display:none">الألسون</div>
       <span class="brand-text" id="brandName">الألسون</span>
     </a>
@@ -93,7 +92,7 @@ document.querySelectorAll('#mobileMenu a').forEach(a => a.onclick = () => docume
           <p id="pDescription" class="text-base text-on-surface-variant leading-relaxed mb-6"></p>
           <div class="bg-surface-container-low rounded-2xl p-5 sm:p-6 mb-6">
             <h2 class="text-xl font-bold text-primary mb-3">تفاصيل البرنامج</h2>
-            <div id="pDetails" class="text-on-surface-variant leading-relaxed whitespace-pre-wrap"></div>
+            <div id="pDetails" class="text-on-surface-variant leading-relaxed whitespace-pre-wrap break-words"></div>
           </div>
           <div id="pMajorsWrap" class="mb-6">
             <h3 class="font-bold text-primary mb-3">الكلمات المفتاحية</h3>
@@ -132,16 +131,9 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt
 
 async function load() {
   // Brand
-  const { data: settings } = await sb.from('settings').select('*').in('key', ['brand_name', 'brand_logo_url']);
+  const { data: settings } = await sb.from('settings').select('*').in('key', ['brand_name']);
   settings?.forEach(s => {
     if (s.key === 'brand_name' && s.value) { $('brandName').textContent = s.value; document.title = s.value; }
-    if (s.key === 'brand_logo_url' && s.value) {
-      const logo = $('brandLogo');
-      logo.src = s.value;
-      logo.style.display = 'block';
-      logo.onload = () => $('brandLogoFallback').style.display = 'none';
-      logo.onerror = () => { logo.style.display = 'none'; $('brandLogoFallback').style.display = 'flex'; };
-    }
   });
 
   const id = new URLSearchParams(location.search).get('id');
